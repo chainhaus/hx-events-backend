@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "hx-events.app.jwtSecret",
+      "type": "java.lang.String",
+      "description": "JWT secret key."
+    },
+    {
+      "name": "hx-events.app.jwtExpirationMs",
+      "type": "java.lang.Integer",
+      "description": "JWT expiration in millis."
+    }
+  ] }
