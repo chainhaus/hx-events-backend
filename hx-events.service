@@ -1,0 +1,11 @@
+[Unit]
+Description=HX events app
+After=syslog.target
+
+[Service]
+User=hx-events-app-runner
+ExecStart=/var/spring-apps/hx-events.jar
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
