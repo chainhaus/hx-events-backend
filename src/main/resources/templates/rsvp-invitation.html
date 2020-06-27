@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${event.title}">Title</title>
+</head>
+<body>
+<div>
+    <div class="adM">
+    </div>
+    <h2 style="text-align:center">Event Title: <span th:text="${event.title}"></span></h2>
+    <div style="padding:10px;margin:10px">This event invitation was sent by HX Events, please click the button below to
+        get the official calendar invitation:
+        <br>
+        <br>
+        <a th:href="${url}" target="_blank">
+            <button style="padding:10px;border:1px solid #eee;background-color:#1863e6;color:white">
+                RSVP
+            </button>
+        </a></div>
+    <br>
+</div>
+</body>
+</html>

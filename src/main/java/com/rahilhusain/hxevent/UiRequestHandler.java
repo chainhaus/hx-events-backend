@@ -10,10 +10,10 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 import java.io.IOException;
 
 @Component
-public class UiHandler implements WebMvcConfigurer {
+public class UiRequestHandler implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**/*")
+        registry.addResourceHandler("/{path:^(?!\\/api\\/).*}")
                 .addResourceLocations("classpath:/static/")
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {
