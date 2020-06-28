@@ -30,6 +30,7 @@ public class EventAttendee {
     @ManyToOne(optional = false)
     private Event event;
 
+    @SuppressWarnings("unused")
     public enum Status {
         RSVP, RSVP_REPLIED, RSVP_ACCEPTED, CALENDER_SENT, CALENDER_ACCEPTED, CALENDER_REJECTED
     }

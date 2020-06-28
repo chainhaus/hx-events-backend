@@ -43,13 +43,7 @@ public class EventController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void sendRsvpInvites(@PathVariable Long eventId, @RequestBody @Valid SendRsvpInvites request) {
         ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentContextPath();
-        eventService.sendRsvpInvites(builder, eventId, request.getGroups());
-    }
-
-    @PostMapping("{eventId}/reply-rsvp/{token}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void replyRsvp(@PathVariable Long eventId, @PathVariable String token) {
-        eventService.replyRsvp(eventId, token);
+        eventService.sendRsvpInvites(builder, eventId, request);
     }
 
 }

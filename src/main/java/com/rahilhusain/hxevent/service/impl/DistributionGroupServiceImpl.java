@@ -17,11 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Log4j2
 @Service
@@ -55,14 +51,16 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
 
     @Override
     public Map<String, Set<String>> getEmailIdsForGroups(Set<DistributionGroupDto> groups) {
-        return groups.stream()
-                .collect(Collectors.toMap(DistributionGroupDto::getDisplayName, group -> {
-                    IDirectoryObjectCollectionWithReferencesPage page = this.getGraphClient().groups(group.getId())
-                            .transitiveMembers()
-                            .buildRequest()
-                            .select("mail")
-                            .get();
-                    return mapper.mapMemberMailsResponse(page);
-                }));
+        Map<String, Set<String>> map = new HashMap<>();
+        groups.forEach(group -> {
+            IDirectoryObjectCollectionWithReferencesPage page = this.getGraphClient().groups(group.getId())
+                    .transitiveMembers()
+                    .buildRequest()
+                    .select("mail")
+                    .get();
+            Set<String> emails = map.computeIfAbsent(group.getDisplayName(), (key) -> new HashSet<>());
+            emails.addAll(mapper.mapMemberMailsResponse(page));
+        });
+        return map;
     }
 }

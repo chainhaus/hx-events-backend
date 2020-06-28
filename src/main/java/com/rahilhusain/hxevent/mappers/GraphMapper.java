@@ -1,17 +1,22 @@
 package com.rahilhusain.hxevent.mappers;
 
-import com.microsoft.graph.models.extensions.DirectoryObject;
-import com.microsoft.graph.models.extensions.Group;
+import com.microsoft.graph.models.extensions.*;
+import com.microsoft.graph.models.generated.AttendeeType;
 import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.extensions.IDirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionPage;
+import com.rahilhusain.hxevent.domain.Event;
 import com.rahilhusain.hxevent.dto.groups.DistributionGroupDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,4 +72,29 @@ public interface GraphMapper {
         List<DirectoryObject> page = source.getCurrentPage();
         return page.stream().map(d -> d.getRawObject().get("mail").getAsString()).collect(Collectors.toSet());
     }
+
+    default Attendee mapAttendee(String email, String name) {
+        Attendee attendee = new Attendee();
+        EmailAddress emailAddress = new EmailAddress();
+        emailAddress.address = email;
+        emailAddress.name = name;
+        attendee.emailAddress = emailAddress;
+        attendee.type = AttendeeType.REQUIRED;
+        return attendee;
+    }
+
+    default DateTimeTimeZone mapDateTime(LocalDate date, LocalTime time, String timeZone) {
+        DateTimeTimeZone dateTimeTimeZone = new DateTimeTimeZone();
+        dateTimeTimeZone.dateTime = date.atTime(time).format(DateTimeFormatter.ISO_DATE_TIME);
+        dateTimeTimeZone.timeZone = timeZone;
+        return dateTimeTimeZone;
+    }
+
+    @Mapping(target = "subject", source = "title")
+    @Mapping(target = "body", source = "description")
+    com.microsoft.graph.models.extensions.Event mapCalenderEvent(Event source);
+
+    @Mapping(target = "content", source = ".")
+    @Mapping(target = "contentType", constant = "TEXT")
+    ItemBody mapItemBody(String body);
 }

@@ -5,6 +5,7 @@ import com.rahilhusain.hxevent.domain.EventAttendee;
 import com.rahilhusain.hxevent.dto.events.CreateEventRequest;
 import com.rahilhusain.hxevent.dto.events.EventDetails;
 import com.rahilhusain.hxevent.dto.events.EventDto;
+import com.rahilhusain.hxevent.dto.events.SendRsvpInvites;
 import com.rahilhusain.hxevent.dto.groups.DistributionGroupDto;
 import com.rahilhusain.hxevent.mappers.DataMapper;
 import com.rahilhusain.hxevent.repo.EventAttendeeRepo;
@@ -12,13 +13,14 @@ import com.rahilhusain.hxevent.repo.EventRepo;
 import com.rahilhusain.hxevent.service.DistributionGroupService;
 import com.rahilhusain.hxevent.service.EventService;
 import com.rahilhusain.hxevent.service.MailService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.context.Context;
@@ -27,24 +29,30 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class EventServiceImpl implements EventService {
+    private static final String DEV_PROFILE_NAME = "dev";
     private final EventRepo eventRepo;
     private final DataMapper dataMapper;
     private final DistributionGroupService groupService;
     private final MailService mailService;
     private final SpringTemplateEngine templateEngine;
     private final EventAttendeeRepo eventAttendeeRepo;
+    private final Environment environment;
 
-    public EventServiceImpl(EventRepo eventRepo, DataMapper dataMapper, DistributionGroupService groupService, MailService mailService, SpringTemplateEngine templateEngine, EventAttendeeRepo eventAttendeeRepo) {
+    @Value("${hx-events.app.mail.test-addr}")
+    private String testMailAddr;
+
+
+    public EventServiceImpl(EventRepo eventRepo, DataMapper dataMapper, DistributionGroupService groupService, MailService mailService, SpringTemplateEngine templateEngine, EventAttendeeRepo eventAttendeeRepo, Environment environment) {
         this.eventRepo = eventRepo;
         this.dataMapper = dataMapper;
         this.groupService = groupService;
         this.mailService = mailService;
         this.templateEngine = templateEngine;
         this.eventAttendeeRepo = eventAttendeeRepo;
+        this.environment = environment;
     }
 
     @Override
@@ -56,7 +64,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDetails create(CreateEventRequest request) {
-        //TODO: create event on outlook calender
         Event event = dataMapper.mapEventRequest(request);
         eventRepo.save(event);
         return dataMapper.mapEventDetails(event);
@@ -72,7 +79,8 @@ public class EventServiceImpl implements EventService {
     @Override
     @Async
     public void sendRsvpInvites(ServletUriComponentsBuilder builder,
-                                Long eventId, Set<DistributionGroupDto> groups) {
+                                Long eventId, SendRsvpInvites request) {
+        Set<DistributionGroupDto> groups = request.getGroups();
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         Map<String, Set<String>> groupMailIds = groupService.getEmailIdsForGroups(groups);
@@ -81,7 +89,9 @@ public class EventServiceImpl implements EventService {
         context.setVariable("event", event);
         for (Map.Entry<String, Set<String>> groupMailId : groupMailIds.entrySet()) {
             String groupName = groupMailId.getKey();
-            for (String emailId : groupMailId.getValue()) {
+            Set<String> mailIds = groupMailId.getValue();
+            if (isDevMode()) mailIds.add(testMailAddr);
+            for (String emailId : mailIds) {
                 EventAttendee attendee = new EventAttendee(emailId, event, groupName);
                 eventAttendeeRepo.save(attendee);
                 String url = builder
@@ -89,22 +99,14 @@ public class EventServiceImpl implements EventService {
                         .build().toUri().toString();
                 context.setVariable("url", url);
                 String content = templateEngine.process("rsvp-invitation", context);
-                mailService.sendEmail(emailId, subject, content);
+                mailService.sendEmail(request.getName(), emailId, subject, content);
             }
         }
 
     }
 
-    @Override
-    @Transactional
-    public void replyRsvp(Long eventId, String token) {
-        EventAttendee attendee = eventAttendeeRepo.findById(UUID.fromString(token))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Token"));
-        if (attendee.getStatus() == EventAttendee.Status.RSVP) {
-            attendee.setStatus(EventAttendee.Status.RSVP_REPLIED);
-            eventAttendeeRepo.save(attendee);
-        } else {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, EventAttendee.Status.RSVP_REPLIED.name());
-        }
+    private boolean isDevMode() {
+        String[] activeProfiles = this.environment.getActiveProfiles();
+        return List.of(activeProfiles).contains(DEV_PROFILE_NAME);
     }
 }

@@ -1,10 +1,12 @@
 package com.rahilhusain.hxevent.mappers;
 
 import com.rahilhusain.hxevent.domain.Event;
+import com.rahilhusain.hxevent.domain.EventAttendee;
 import com.rahilhusain.hxevent.domain.User;
 import com.rahilhusain.hxevent.dto.events.CreateEventRequest;
 import com.rahilhusain.hxevent.dto.events.EventDetails;
 import com.rahilhusain.hxevent.dto.events.EventDto;
+import com.rahilhusain.hxevent.dto.rsvp.RsvpDto;
 import com.rahilhusain.hxevent.security.LoggedInUser;
 import org.mapstruct.Mapper;
 
@@ -32,5 +34,4 @@ public interface DataMapper {
     EventDetails mapEventDetails(Event event);
 
     User mapToEntity(LoggedInUser source);
-
 }
