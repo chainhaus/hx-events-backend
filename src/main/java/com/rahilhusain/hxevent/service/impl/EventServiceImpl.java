@@ -5,6 +5,7 @@ import com.rahilhusain.hxevent.domain.EventAttendee;
 import com.rahilhusain.hxevent.dto.events.CreateEventRequest;
 import com.rahilhusain.hxevent.dto.events.EventDetails;
 import com.rahilhusain.hxevent.dto.events.EventDto;
+import com.rahilhusain.hxevent.dto.groups.DistributionGroupDto;
 import com.rahilhusain.hxevent.mappers.DataMapper;
 import com.rahilhusain.hxevent.repo.EventAttendeeRepo;
 import com.rahilhusain.hxevent.repo.EventRepo;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,6 +25,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -67,23 +70,27 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void sendRsvpInvites(Long eventId, Set<String> groupIds) {
+    @Async
+    public void sendRsvpInvites(ServletUriComponentsBuilder builder,
+                                Long eventId, Set<DistributionGroupDto> groups) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
-        Set<String> emailIds = groupService.getEmailIdsForGroups(groupIds);
+        Map<String, Set<String>> groupMailIds = groupService.getEmailIdsForGroups(groups);
         String subject = "Invitation for event - " + event.getTitle();
         Context context = new Context();
         context.setVariable("event", event);
-        for (String emailId : emailIds) {
-            EventAttendee attendee = new EventAttendee(emailId, event);
-            eventAttendeeRepo.save(attendee);
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .pathSegment("/events", eventId.toString(), "/reply-rsvp", attendee.getId().toString())
-                    .build().toUri().toString();
-            context.setVariable("url", url);
-            String content = templateEngine.process("rsvp-invitation", context);
-            //TODO: send to actual email
-            mailService.sendEmail("rahilhusain166@gmail.com", subject, content);
+        for (Map.Entry<String, Set<String>> groupMailId : groupMailIds.entrySet()) {
+            String groupName = groupMailId.getKey();
+            for (String emailId : groupMailId.getValue()) {
+                EventAttendee attendee = new EventAttendee(emailId, event, groupName);
+                eventAttendeeRepo.save(attendee);
+                String url = builder
+                        .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getId().toString())
+                        .build().toUri().toString();
+                context.setVariable("url", url);
+                String content = templateEngine.process("rsvp-invitation", context);
+                mailService.sendEmail(emailId, subject, content);
+            }
         }
 
     }

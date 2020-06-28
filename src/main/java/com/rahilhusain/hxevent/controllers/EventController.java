@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 
@@ -41,7 +42,8 @@ public class EventController {
     @PostMapping("{eventId}/send-invites")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void sendRsvpInvites(@PathVariable Long eventId, @RequestBody @Valid SendRsvpInvites request) {
-        eventService.sendRsvpInvites(eventId, request.getGroupIds());
+        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentContextPath();
+        eventService.sendRsvpInvites(builder, eventId, request.getGroups());
     }
 
     @PostMapping("{eventId}/reply-rsvp/{token}")

@@ -9,5 +9,31 @@
       "name": "hx-events.app.jwtExpirationMs",
       "type": "java.lang.Integer",
       "description": "JWT expiration in millis."
+    },
+    {
+      "name": "hx-events.app.mail.test-addr",
+      "type": "java.lang.String",
+      "description": "Description for hx-events.app.mail.test-addr."
+    },
+    {
+      "name": "hx-events.app.mail.reply-to",
+      "type": "java.lang.String",
+      "description": "Description for hx-events.app.mail.reply-to."
+    },
+    {
+      "name": "hx-events.azure.scopes",
+      "type": "java.lang.String",
+      "description": "Description for hx-events.azure.scopes."
+    },
+    {
+      "name": "hx-events.azure.authority",
+      "type": "java.lang.String",
+      "description": "Description for hx-events.azure.authority."
+    },
+    {
+      "name": "hx-events.azure.application-id",
+      "type": "java.lang.String",
+      "description": "Description for hx-events.azure.application-id."
     }
-  ] }
+  ]
+}

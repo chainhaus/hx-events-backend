@@ -13,7 +13,8 @@ import java.io.IOException;
 public class UiRequestHandler implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/{path:^(?!\\/api\\/).*}")
+        registry.addResourceHandler("/**")
+//        registry.addResourceHandler("/{path:^(?!\\/api\\/).*}")
                 .addResourceLocations("classpath:/static/")
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {

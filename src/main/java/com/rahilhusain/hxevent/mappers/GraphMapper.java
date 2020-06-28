@@ -1,9 +1,7 @@
 package com.rahilhusain.hxevent.mappers;
 
 import com.microsoft.graph.models.extensions.DirectoryObject;
-import com.microsoft.graph.models.extensions.EmailAddress;
 import com.microsoft.graph.models.extensions.Group;
-import com.microsoft.graph.models.extensions.Recipient;
 import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.extensions.IDirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionPage;
@@ -64,13 +62,6 @@ public interface GraphMapper {
         return new PageImpl<>(data, pageable, totalElements);
     }
 
-    default Recipient mapMailRecipient(String address) {
-        Recipient recipient = new Recipient();
-        EmailAddress emailAddress = new EmailAddress();
-        emailAddress.address = address;
-        recipient.emailAddress = emailAddress;
-        return recipient;
-    }
 
     default Set<String> mapMemberMailsResponse(IDirectoryObjectCollectionWithReferencesPage source) {
         List<DirectoryObject> page = source.getCurrentPage();

@@ -3,6 +3,7 @@ package com.rahilhusain.hxevent.service.impl;
 import com.microsoft.graph.authentication.IAuthenticationProvider;
 import com.microsoft.graph.http.GraphServiceException;
 import com.microsoft.graph.options.QueryOption;
+import com.microsoft.graph.requests.extensions.IDirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionRequest;
 import com.rahilhusain.hxevent.dto.groups.DistributionGroupDto;
@@ -17,8 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,15 +54,15 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
     }
 
     @Override
-    public Set<String> getEmailIdsForGroups(Set<String> groupIds) {
-        return groupIds.stream()
-                .map(groupId -> this.getGraphClient().groups(groupId)
-                        .transitiveMembers()
-                        .buildRequest()
-                        .select("mail")
-                        .get())
-                .map(mapper::mapMemberMailsResponse)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+    public Map<String, Set<String>> getEmailIdsForGroups(Set<DistributionGroupDto> groups) {
+        return groups.stream()
+                .collect(Collectors.toMap(DistributionGroupDto::getDisplayName, group -> {
+                    IDirectoryObjectCollectionWithReferencesPage page = this.getGraphClient().groups(group.getId())
+                            .transitiveMembers()
+                            .buildRequest()
+                            .select("mail")
+                            .get();
+                    return mapper.mapMemberMailsResponse(page);
+                }));
     }
 }

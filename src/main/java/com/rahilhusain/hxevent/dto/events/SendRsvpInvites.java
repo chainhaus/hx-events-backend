@@ -1,5 +1,6 @@
 package com.rahilhusain.hxevent.dto.events;
 
+import com.rahilhusain.hxevent.dto.groups.DistributionGroupDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,5 +11,5 @@ import java.util.Set;
 @Setter
 public class SendRsvpInvites {
     @NotEmpty
-    private Set<String> groupIds;
+    private Set<DistributionGroupDto> groups;
 }
