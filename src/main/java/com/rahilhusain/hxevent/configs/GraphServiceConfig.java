@@ -23,10 +23,10 @@ import java.util.concurrent.Executors;
 @Configuration
 public class GraphServiceConfig {
 
-    @Value("${spring.mail.username}")
+    @Value("${hx-events.azure.username}")
     private String username;
 
-    @Value("${spring.mail.password}")
+    @Value("${hx-events.azure.password}")
     private String password;
 
     private String token;
