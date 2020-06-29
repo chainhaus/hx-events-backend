@@ -2,6 +2,7 @@ package com.rahilhusain.hxevent.service.impl;
 
 import com.rahilhusain.hxevent.service.MailService;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import javax.mail.internet.MimeMessage;
 
 import static javax.mail.Message.RecipientType;
 
+@Log4j2
 @Service
 public class MailServiceImpl implements MailService {
 
@@ -37,6 +39,7 @@ public class MailServiceImpl implements MailService {
         mimeMessage.setFrom(new InternetAddress(fromMailAddr, from));
         mimeMessage.setReplyTo(new Address[]{new InternetAddress(replyToAddr)});
         mimeMessage.addRecipient(RecipientType.TO, new InternetAddress(recipient));
+        log.info("Sending mail with subject \"{}\" to \"{}\"", subject, recipient);
         mailSender.send(mimeMessage);
     }
 

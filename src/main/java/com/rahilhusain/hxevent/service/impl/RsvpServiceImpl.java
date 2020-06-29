@@ -82,10 +82,17 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             ResponseType newStatus = attendees.get(entity.getEmail());
             if (newStatus != null) {
                 switch (newStatus) {
-                    case ACCEPTED, TENTATIVELY_ACCEPTED -> entity.setStatus(Status.CALENDER_ACCEPTED);
-                    case DECLINED -> entity.setStatus(Status.CALENDER_REJECTED);
+                    case ACCEPTED, TENTATIVELY_ACCEPTED -> {
+                        log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_ACCEPTED);
+                        entity.setStatus(Status.CALENDER_ACCEPTED);
+                    }
+                    case DECLINED -> {
+                        log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_REJECTED);
+                        entity.setStatus(Status.CALENDER_REJECTED);
+                    }
                 }
                 if (entity.getStatus() == Status.RSVP_ACCEPTED) {
+                    log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_SENT);
                     entity.setStatus(Status.CALENDER_SENT);
                 }
                 attendeeRepo.save(entity);
@@ -134,6 +141,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         com.microsoft.graph.models.extensions.Event calenderEvent = mapper.mapCalenderEvent(event);
         calenderEvent.start = mapper.mapDateTime(event.getDate(), event.getStartTime(), timeZone);
         calenderEvent.end = mapper.mapDateTime(event.getDate(), event.getEndTime(), timeZone);
+        log.info("Creating calender event {}({}), with attendees {}", event.getTitle(), event.getId(), attendee);
         calenderEvent.attendees = attendee.entrySet()
                 .stream()
                 .map(a -> mapper.mapAttendee(a.getKey(), a.getValue()))
@@ -145,6 +153,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
 
     public void updateCalenderEvent(String eventId, Map<String, String> attendee) {
         com.microsoft.graph.models.extensions.Event calenderEvent = new com.microsoft.graph.models.extensions.Event();
+        log.info("Updating attendees of calender event {}, with attendees {}", eventId, attendee);
         calenderEvent.attendees = attendee.entrySet()
                 .stream()
                 .map(a -> mapper.mapAttendee(a.getKey(), a.getValue()))
