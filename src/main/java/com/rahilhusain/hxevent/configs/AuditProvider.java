@@ -1,7 +1,6 @@
 package com.rahilhusain.hxevent.configs;
 
-import com.rahilhusain.hxevent.mappers.DataMapper;
-import com.rahilhusain.hxevent.security.LoggedInUser;
+import com.microsoft.azure.spring.autoconfigure.aad.UserPrincipal;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -15,11 +14,13 @@ import java.util.Optional;
 public class AuditProvider {
 
     @Bean
-    public AuditorAware auditorAware(DataMapper mapper) {
+    public AuditorAware<String> auditorAware() {
         return () -> {
-            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (principal instanceof LoggedInUser) {
-                return Optional.of(mapper.mapToEntity((LoggedInUser) principal));
+            Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (p instanceof UserPrincipal) {
+                UserPrincipal principal = (UserPrincipal) p;
+                String email = (String) principal.getClaim("email");
+                return Optional.ofNullable(email).or(() -> Optional.of(principal.getSubject()));
             }
             return Optional.empty();
         };

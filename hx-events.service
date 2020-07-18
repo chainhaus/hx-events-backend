@@ -6,8 +6,8 @@ After=syslog.target
 User=hx-events-app-runner
 ExecStart=/var/spring-apps/hx-events.jar
 SuccessExitStatus=143
-StandardOutput=append:/var/spring-apps/hx-events.log
-StandardError=append:/var/spring-apps/hx-events-err.log
+#StandardOutput=append:/var/spring-apps/hx-events.log
+#StandardError=append:/var/spring-apps/hx-events-err.log
 
 [Install]
 WantedBy=multi-user.target

@@ -2,12 +2,16 @@ package com.rahilhusain.hxevent.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.NaturalId;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -50,7 +54,7 @@ public class Event {
     private Instant createdDate;
 
     @CreatedBy
-    @ManyToOne(optional = false)
-    private User createdBy;
+    @Column(nullable = false)
+    private String createdBy;
 
 }

@@ -9,6 +9,7 @@ import com.microsoft.graph.requests.extensions.IGroupCollectionRequest;
 import com.rahilhusain.hxevent.dto.groups.DistributionGroupDto;
 import com.rahilhusain.hxevent.mappers.GraphMapper;
 import com.rahilhusain.hxevent.service.DistributionGroupService;
+import com.rahilhusain.hxevent.service.GraphService;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Log4j2
 @Service
@@ -35,7 +41,6 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
     public Page<DistributionGroupDto> getAllDistributionGroups(Pageable pageable) {
         //paging not supported for the groups resource
         List<QueryOption> options = new ArrayList<>(2);
-        options.add(new QueryOption("$filter", "startswith(mail,'dlist')"));
         mapper.mapSortParam(pageable.getSort()).ifPresent(options::add);
         IGroupCollectionRequest request = this.getGraphClient().groups()
                 .buildRequest(options)
