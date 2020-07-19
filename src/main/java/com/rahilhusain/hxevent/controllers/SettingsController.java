@@ -42,8 +42,4 @@ public class SettingsController {
         settingsService.deleteDisplayName(id);
     }
 
-    @GetMapping({"", "/"})
-    public String login(@AuthenticationPrincipal Principal principal) {
-        return "success";
-    }
 }
