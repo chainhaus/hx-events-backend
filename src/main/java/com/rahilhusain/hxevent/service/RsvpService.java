@@ -18,7 +18,7 @@ public interface RsvpService {
 
     void updateAttendeeStatus(RsvpDto.EventDto event);
 
-    void replyInvitation(String invitationId);
+    void replyInvitation(String invitationId, String reply);
 
     void approveInvitation(ApproveRsvpRequest request);
 

@@ -5,7 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.UUID;
 
 @Entity
@@ -32,7 +37,7 @@ public class EventAttendee {
 
     @SuppressWarnings("unused")
     public enum Status {
-        RSVP, RSVP_REPLIED, RSVP_ACCEPTED, CALENDER_SENT, CALENDER_ACCEPTED, CALENDER_REJECTED
+        RSVP_SENT, RSVP_ACCEPTED, RSVP_DECLINED, RSVP_APPROVED, CALENDER_SENT, CALENDER_ACCEPTED, CALENDER_DECLINED
     }
 
     public EventAttendee(String email, Event event, String groupName) {

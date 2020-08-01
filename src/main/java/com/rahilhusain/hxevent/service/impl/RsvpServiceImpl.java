@@ -23,7 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,7 +70,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Override
     public void updateAttendeeStatus(Page<RsvpDto> page) {
         Map<Long, RsvpDto.EventDto> eventMap = new HashMap<>();
-        page.get().filter(attendee -> attendee.getStatus() == Status.RSVP_ACCEPTED || attendee.getStatus() == Status.CALENDER_SENT)
+        page.get().filter(attendee -> attendee.getStatus() == Status.RSVP_APPROVED || attendee.getStatus() == Status.CALENDER_SENT)
                 .map(RsvpDto::getEvent)
                 .filter(e -> e.getExternalId() != null)
                 .forEach(e -> eventMap.put(e.getId(), e));
@@ -78,7 +83,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Transactional
     public void updateAttendeeStatus(RsvpDto.EventDto event) {
         Map<String, ResponseType> attendees = getCalenderEventAttendeesStatus(event.getExternalId());
-        List<EventAttendee> pendingAttendees = attendeeRepo.findAllByEventIdAndStatusIn(event.getId(), Status.RSVP_ACCEPTED, Status.CALENDER_SENT);
+        List<EventAttendee> pendingAttendees = attendeeRepo.findAllByEventIdAndStatusIn(event.getId(), Status.RSVP_APPROVED, Status.CALENDER_SENT);
         pendingAttendees.forEach((entity) -> {
             ResponseType newStatus = attendees.get(entity.getEmail());
             if (newStatus != null) {
@@ -88,11 +93,11 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                         entity.setStatus(Status.CALENDER_ACCEPTED);
                     }
                     case DECLINED -> {
-                        log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_REJECTED);
-                        entity.setStatus(Status.CALENDER_REJECTED);
+                        log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_DECLINED);
+                        entity.setStatus(Status.CALENDER_DECLINED);
                     }
                 }
-                if (entity.getStatus() == Status.RSVP_ACCEPTED) {
+                if (entity.getStatus() == Status.RSVP_APPROVED) {
                     log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_SENT);
                     entity.setStatus(Status.CALENDER_SENT);
                 }
@@ -104,8 +109,12 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     }
 
     @Override
-    public void replyInvitation(String invitationId) {
-        updateStatus(invitationId, Status.RSVP_REPLIED, Status.RSVP);
+    public void replyInvitation(String invitationId, String reply) {
+        if ("accept".equalsIgnoreCase(reply)) {
+            updateStatus(invitationId, Status.RSVP_ACCEPTED, Status.RSVP_SENT);
+        } else if ("decline".equalsIgnoreCase(reply)) {
+            updateStatus(invitationId, Status.RSVP_DECLINED, Status.RSVP_SENT);
+        }
     }
 
     @Override
@@ -114,7 +123,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             Event event = eventRepo.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event Not found:" + eventId));
             List<UUID> invitationIds = value.stream().map(UUID::fromString).collect(Collectors.toList());
             List<EventAttendee> attendees = attendeeRepo.findAllById(invitationIds);
-            attendees.forEach(attendee -> updateAttendeeStatus(Status.RSVP_ACCEPTED, Status.RSVP_REPLIED, attendee));
+            attendees.forEach(attendee -> updateAttendeeStatus(Status.RSVP_APPROVED, Status.RSVP_ACCEPTED, attendee));
             sendCalenderInvite(event, attendees);
         });
     }

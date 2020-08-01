@@ -14,11 +14,17 @@
         get the official calendar invitation:
         <br>
         <br>
-        <a th:href="${url}" target="_blank">
+        <a th:href="${url}+'/accept'" target="_blank">
             <button style="padding:10px;border:1px solid #eee;background-color:#1863e6;color:white">
-                RSVP
+                Accept
             </button>
-        </a></div>
+        </a>
+        <a th:href="${url}+'/decline'" target="_blank" th:if="${decline}">
+            <button style="padding:10px;border:1px solid #eee;background-color:#1863e6;color:white">
+                Decline
+            </button>
+        </a>
+    </div>
     <br>
 </div>
 </body>

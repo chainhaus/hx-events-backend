@@ -94,6 +94,7 @@ public class EventServiceImpl implements EventService {
             for (String emailId : mailIds) {
                 EventAttendee attendee = new EventAttendee(emailId, event, groupName);
                 eventAttendeeRepo.save(attendee);
+                context.setVariable("decline", request.isDecline());
                 String url = builder
                         .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getId().toString())
                         .build().toUri().toString();

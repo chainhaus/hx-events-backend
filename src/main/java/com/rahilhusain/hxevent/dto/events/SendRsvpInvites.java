@@ -15,4 +15,5 @@ public class SendRsvpInvites {
     private String name;
     @NotEmpty
     private Set<DistributionGroupDto> groups;
+    private boolean decline;
 }

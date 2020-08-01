@@ -23,7 +23,7 @@ public class MailServiceImpl implements MailService {
     @Value("${hx-events.app.mail.reply-to}")
     private String replyToAddr;
 
-    @Value("${spring.mail.username}")
+    @Value("${hx-events.app.mail.from-addr}")
     private String fromMailAddr;
 
     public MailServiceImpl(JavaMailSender mailSender) {
