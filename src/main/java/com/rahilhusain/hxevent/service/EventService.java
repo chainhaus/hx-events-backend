@@ -3,6 +3,7 @@ package com.rahilhusain.hxevent.service;
 import com.rahilhusain.hxevent.dto.events.CreateEventRequest;
 import com.rahilhusain.hxevent.dto.events.EventDetails;
 import com.rahilhusain.hxevent.dto.events.EventDto;
+import com.rahilhusain.hxevent.dto.events.EventStatistic;
 import com.rahilhusain.hxevent.dto.events.SendRsvpInvites;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,5 @@ public interface EventService {
 
     EventDetails getEventDetails(Long eventId);
 
-    void sendRsvpInvites(ServletUriComponentsBuilder builder, Long eventId, SendRsvpInvites groupIds);
-
+    void sendRsvpInvites(Long eventId, SendRsvpInvites groupIds);
 }

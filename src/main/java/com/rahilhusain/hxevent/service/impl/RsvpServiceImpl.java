@@ -5,12 +5,14 @@ import com.microsoft.graph.models.generated.ResponseType;
 import com.rahilhusain.hxevent.domain.Event;
 import com.rahilhusain.hxevent.domain.EventAttendee;
 import com.rahilhusain.hxevent.domain.EventAttendee.Status;
+import com.rahilhusain.hxevent.domain.Mail;
 import com.rahilhusain.hxevent.dto.ApproveRsvpRequest;
 import com.rahilhusain.hxevent.dto.rsvp.RsvpDto;
 import com.rahilhusain.hxevent.mappers.GraphMapper;
 import com.rahilhusain.hxevent.repo.EventAttendeeRepo;
 import com.rahilhusain.hxevent.repo.EventRepo;
 import com.rahilhusain.hxevent.service.GraphService;
+import com.rahilhusain.hxevent.service.MailService;
 import com.rahilhusain.hxevent.service.RsvpService;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -22,6 +24,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,16 +44,20 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     private final EventRepo eventRepo;
     private final EventAttendeeRepo attendeeRepo;
     private final GraphMapper mapper;
+    private final TemplateEngine templateEngine;
+    private final MailService mailService;
 
 
     @Value("${hx-events.azure.time-zone}")
     private String timeZone;
 
-    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper) {
+    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper, TemplateEngine templateEngine, MailService mailService) {
         this.attendeeRepo = attendeeRepo;
         this.authenticationProvider = authenticationProvider;
         this.eventRepo = eventRepo;
         this.mapper = mapper;
+        this.templateEngine = templateEngine;
+        this.mailService = mailService;
     }
 
     @Override
@@ -118,13 +126,32 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     }
 
     @Override
+    @Transactional
     public void approveInvitation(ApproveRsvpRequest request) {
         request.getInvitationIds().forEach((eventId, value) -> {
             Event event = eventRepo.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event Not found:" + eventId));
             List<UUID> invitationIds = value.stream().map(UUID::fromString).collect(Collectors.toList());
             List<EventAttendee> attendees = attendeeRepo.findAllById(invitationIds);
-            attendees.forEach(attendee -> updateAttendeeStatus(Status.RSVP_APPROVED, Status.RSVP_ACCEPTED, attendee));
-            sendCalenderInvite(event, attendees);
+            String subject = "Confirmation for event - " + event.getTitle();
+            Context context = new Context();
+            context.setVariable("event", event);
+            for (EventAttendee attendee : attendees) {
+                context.setVariable("attendee", attendee);
+                if (attendee.getStatus() == Status.RSVP_SENT || attendee.getStatus() == Status.RSVP_ACCEPTED || attendee.getStatus() == Status.RSVP_DECLINED) {
+                    attendee.setStatus(request.isRejected() ? Status.RSVP_REJECTED : Status.RSVP_APPROVED);
+                }
+                if (attendee.getStatus() == Status.RSVP_APPROVED) {
+                    String content = templateEngine.process("rsvp-approved", context);
+                    Mail mail = new Mail();
+                    mail.setSubject(subject);
+                    mail.setBody(content);
+                    mail.setAttendee(attendee);
+                    mail.setFromName("HX-Events");
+                    mail.setToAddress(attendee.getEmail());
+                    mail.setType(Mail.Type.APPROVED);
+                    mailService.queueMail(mail);
+                }
+            }
         });
     }
 
@@ -138,8 +165,9 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             attendee.forEach(a -> attendeeMap.put(a.getEmail(), a.getEmail()));
             com.microsoft.graph.models.extensions.Event calenderEvent = createCalenderEvent(event, attendeeMap);
             event.setExternalId(calenderEvent.id);
+            eventRepo.save(event);
         } else {
-            Set<String> emailIds = attendeeRepo.findAllApprovedAttendeesForCalenderEvent(externalId);
+            Set<String> emailIds = attendeeRepo.findAllInvitedAttendeesForCalenderEvent(externalId);
             Map<String, String> attendeeMap = emailIds.stream().collect(Collectors.toMap(Function.identity(), Function.identity()));
             updateCalenderEvent(externalId, attendeeMap);
         }

@@ -10,4 +10,5 @@ import java.util.Set;
 @Setter
 public class ApproveRsvpRequest {
     private Map<Long, Set<String>> invitationIds;
+    private boolean rejected;
 }

@@ -17,8 +17,8 @@ public interface EventAttendeeRepo extends JpaRepository<EventAttendee, UUID> {
     Page<RsvpDto> findAllByEventId(Long eventId, Pageable pageable);
 
     @SuppressWarnings("JpaQlInspection")
-    @Query("SELECT a.email FROM EventAttendee a JOIN a.event e WHERE e.externalId = :externalId AND a.status NOT IN ('RSVP_SENT', 'RSVP_ACCEPTED', 'RSVP_DECLINED')")
-    Set<String> findAllApprovedAttendeesForCalenderEvent(String externalId);
+    @Query("SELECT a.email FROM EventAttendee a JOIN a.event e WHERE e.externalId = :externalId AND a.status NOT IN ('RSVP_SENT', 'RSVP_ACCEPTED', 'RSVP_DECLINED', 'RSVP_APPROVED')")
+    Set<String> findAllInvitedAttendeesForCalenderEvent(String externalId);
 
     List<EventAttendee> findAllByEventIdAndStatusIn(Long id, EventAttendee.Status... calenderSent);
 }

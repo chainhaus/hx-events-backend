@@ -39,7 +39,10 @@ public class EventAttendee {
 
     @SuppressWarnings("unused")
     public enum Status {
-        RSVP_SENT, RSVP_ACCEPTED, RSVP_DECLINED, RSVP_APPROVED, CALENDER_SENT, CALENDER_ACCEPTED, CALENDER_DECLINED
+        RSVP_SENT, //initial state
+        RSVP_ACCEPTED, RSVP_DECLINED,//by attendee
+        RSVP_APPROVED, RSVP_REJECTED, //by admin
+        CALENDER_SENT, CALENDER_ACCEPTED, CALENDER_DECLINED//by attendee
     }
 
     public EventAttendee(String email, String companyName, String groupName) {

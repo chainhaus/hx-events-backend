@@ -2,6 +2,7 @@ package com.rahilhusain.hxevent.service.impl;
 
 import com.rahilhusain.hxevent.domain.Event;
 import com.rahilhusain.hxevent.domain.EventAttendee;
+import com.rahilhusain.hxevent.domain.Mail;
 import com.rahilhusain.hxevent.dto.events.CreateEventRequest;
 import com.rahilhusain.hxevent.dto.events.EventDetails;
 import com.rahilhusain.hxevent.dto.events.EventDto;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -76,9 +76,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Async
-    public void sendRsvpInvites(ServletUriComponentsBuilder builder,
-                                Long eventId, SendRsvpInvites request) {
+    public void sendRsvpInvites(Long eventId, SendRsvpInvites request) {
         Set<DistributionGroupDto> groups = request.getGroups();
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
@@ -93,12 +91,20 @@ public class EventServiceImpl implements EventService {
         for (EventAttendee attendee : attendees) {
             attendee.setEvent(event);
             eventAttendeeRepo.save(attendee);
-            String url = builder
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getId().toString())
                     .build().toUri().toString();
             context.setVariable("url", url);
             String content = templateEngine.process("rsvp-invitation", context);
-            mailService.sendEmail(request.getName(), attendee.getEmail(), subject, content, request.getReplyTo());
+            Mail mail = new Mail();
+            mail.setSubject(subject);
+            mail.setBody(content);
+            mail.setAttendee(attendee);
+            mail.setFromName(request.getName());
+            mail.setToAddress(attendee.getEmail());
+            mail.setReplyToAddress(request.getReplyTo());
+            mail.setType(Mail.Type.RSVP);
+            mailService.queueMail(mail);
         }
 
     }
