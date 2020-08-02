@@ -6,6 +6,7 @@ import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.extensions.IDirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionRequest;
+import com.rahilhusain.hxevent.domain.EventAttendee;
 import com.rahilhusain.hxevent.dto.groups.DistributionGroupDto;
 import com.rahilhusain.hxevent.mappers.GraphMapper;
 import com.rahilhusain.hxevent.service.DistributionGroupService;
@@ -19,11 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -55,17 +54,14 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
     }
 
     @Override
-    public Map<String, Set<String>> getEmailIdsForGroups(Set<DistributionGroupDto> groups) {
-        Map<String, Set<String>> map = new HashMap<>();
-        groups.forEach(group -> {
+    public List<EventAttendee> getAttendeesForDistributionGroups(Set<DistributionGroupDto> groups) {
+        return groups.stream().flatMap(group -> {
             IDirectoryObjectCollectionWithReferencesPage page = this.getGraphClient().groups(group.getId())
-                    .transitiveMembers()
+                    .members()
                     .buildRequest()
-                    .select("mail")
+                    .select("mail,companyName")
                     .get();
-            Set<String> emails = map.computeIfAbsent(group.getDisplayName(), (key) -> new HashSet<>());
-            emails.addAll(mapper.mapMemberMailsResponse(page));
-        });
-        return map;
+            return mapper.mapMemberMailsResponse(page, group.getDisplayName());
+        }).collect(Collectors.toList());
     }
 }

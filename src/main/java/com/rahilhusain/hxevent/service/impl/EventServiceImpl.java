@@ -27,7 +27,6 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -83,25 +82,23 @@ public class EventServiceImpl implements EventService {
         Set<DistributionGroupDto> groups = request.getGroups();
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
-        Map<String, Set<String>> groupMailIds = groupService.getEmailIdsForGroups(groups);
+        List<EventAttendee> attendees = groupService.getAttendeesForDistributionGroups(groups);
         String subject = "Invitation for event - " + event.getTitle();
         Context context = new Context();
         context.setVariable("event", event);
-        for (Map.Entry<String, Set<String>> groupMailId : groupMailIds.entrySet()) {
-            String groupName = groupMailId.getKey();
-            Set<String> mailIds = groupMailId.getValue();
-            if (isDevMode()) mailIds.add(testMailAddr);
-            for (String emailId : mailIds) {
-                EventAttendee attendee = new EventAttendee(emailId, event, groupName);
-                eventAttendeeRepo.save(attendee);
-                context.setVariable("decline", request.isDecline());
-                String url = builder
-                        .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getId().toString())
-                        .build().toUri().toString();
-                context.setVariable("url", url);
-                String content = templateEngine.process("rsvp-invitation", context);
-                mailService.sendEmail(request.getName(), emailId, subject, content);
-            }
+        if (isDevMode()) {
+            attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG"));
+        }
+        context.setVariable("decline", request.isDecline());
+        for (EventAttendee attendee : attendees) {
+            attendee.setEvent(event);
+            eventAttendeeRepo.save(attendee);
+            String url = builder
+                    .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getId().toString())
+                    .build().toUri().toString();
+            context.setVariable("url", url);
+            String content = templateEngine.process("rsvp-invitation", context);
+            mailService.sendEmail(request.getName(), attendee.getEmail(), subject, content, request.getReplyTo());
         }
 
     }

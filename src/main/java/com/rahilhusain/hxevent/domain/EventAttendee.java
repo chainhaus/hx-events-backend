@@ -24,12 +24,14 @@ public class EventAttendee {
     @Column(nullable = false)
     private String email;
 
+    private String companyName;
+
     @Column(nullable = false)
     private String groupName;
 
     @Column(nullable = false, insertable = false)
     @Enumerated(EnumType.STRING)
-    @ColumnDefault("'RSVP'")
+    @ColumnDefault("'RSVP_SENT'")
     private Status status;
 
     @ManyToOne(optional = false)
@@ -40,10 +42,10 @@ public class EventAttendee {
         RSVP_SENT, RSVP_ACCEPTED, RSVP_DECLINED, RSVP_APPROVED, CALENDER_SENT, CALENDER_ACCEPTED, CALENDER_DECLINED
     }
 
-    public EventAttendee(String email, Event event, String groupName) {
+    public EventAttendee(String email, String companyName, String groupName) {
         this.id = UUID.randomUUID();
         this.email = email;
-        this.event = event;
+        this.companyName = companyName;
         this.groupName = groupName;
     }
 }

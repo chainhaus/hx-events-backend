@@ -1,9 +1,9 @@
 package com.rahilhusain.hxevent.controllers;
 
 import com.rahilhusain.hxevent.domain.DisplayName;
+import com.rahilhusain.hxevent.domain.ReplyTo;
 import com.rahilhusain.hxevent.service.SettingsService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -42,6 +41,23 @@ public class SettingsController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addDisplayName(@PathVariable Integer id) {
         settingsService.deleteDisplayName(id);
+    }
+
+    @GetMapping("reply-to")
+    public List<ReplyTo> getReplyToList() {
+        return settingsService.getReplyToList();
+    }
+
+    @PostMapping("reply-to")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addReplyTo(@RequestBody @Valid ReplyTo request) {
+        settingsService.addReplyTo(request);
+    }
+
+    @DeleteMapping("reply-to/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addReplyTo(@PathVariable Integer id) {
+        settingsService.deleteReplyTo(id);
     }
 
 }

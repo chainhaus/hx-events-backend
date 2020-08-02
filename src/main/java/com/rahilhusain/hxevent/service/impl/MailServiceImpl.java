@@ -19,10 +19,6 @@ public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
 
-
-    @Value("${hx-events.app.mail.reply-to}")
-    private String replyToAddr;
-
     @Value("${hx-events.app.mail.from-addr}")
     private String fromMailAddr;
 
@@ -32,12 +28,12 @@ public class MailServiceImpl implements MailService {
 
     @SneakyThrows
     @Override
-    public void sendEmail(String from, String recipient, String subject, String content) {
+    public void sendEmail(String from, String recipient, String subject, String content, String replyTo) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         mimeMessage.setSubject(subject);
         mimeMessage.setContent(content, "text/html");
         mimeMessage.setFrom(new InternetAddress(fromMailAddr, from));
-        mimeMessage.setReplyTo(new Address[]{new InternetAddress(replyToAddr)});
+        mimeMessage.setReplyTo(new Address[]{new InternetAddress(replyTo)});
         mimeMessage.addRecipient(RecipientType.TO, new InternetAddress(recipient));
         log.info("Sending mail with subject \"{}\" to \"{}\"", subject, recipient);
         mailSender.send(mimeMessage);

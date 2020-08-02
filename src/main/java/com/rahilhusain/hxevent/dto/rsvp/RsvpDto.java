@@ -12,6 +12,8 @@ public interface RsvpDto {
 
     String getGroupName();
 
+    String getCompanyName();
+
     EventAttendee.Status getStatus();
 
     EventDto getEvent();
