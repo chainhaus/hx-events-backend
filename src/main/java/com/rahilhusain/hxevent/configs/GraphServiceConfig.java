@@ -84,7 +84,7 @@ public class GraphServiceConfig {
         if (result != null) {
             this.token = result.accessToken();
             this.nextTokenRefreshDelayOnError = DEFAULT_TOKEN_REFRESH_DELAY_ON_ERROR;//reset on success
-            log.info("Graph OAuth2 token updated");
+            log.debug("Graph OAuth2 token updated");
             scheduleTokenRefreshTask(result.expiresOnDate().toInstant());
         }
     }

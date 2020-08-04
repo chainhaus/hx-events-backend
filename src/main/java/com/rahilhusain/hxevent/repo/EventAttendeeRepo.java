@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,7 @@ public interface EventAttendeeRepo extends JpaRepository<EventAttendee, UUID> {
 
     @SuppressWarnings("JpaQlInspection")
     @Query("SELECT a.email FROM EventAttendee a JOIN a.event e WHERE e.externalId = :externalId AND a.status NOT IN ('RSVP_SENT', 'RSVP_ACCEPTED', 'RSVP_DECLINED', 'RSVP_APPROVED')")
-    Set<String> findAllInvitedAttendeesForCalenderEvent(String externalId);
+    Set<String> findAllInvitedAttendeesForCalenderEvent(@Param("externalId") String externalId);
 
     List<EventAttendee> findAllByEventIdAndStatusIn(Long id, EventAttendee.Status... calenderSent);
 }

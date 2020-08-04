@@ -65,11 +65,11 @@ public class MailServiceImpl implements MailService, ApplicationContextAware {
 
     @Override
     public void sendQueuedMails() {
-        log.info("Running Mail queue scheduler");
+        log.debug("Running Mail queue scheduler");
         MailSetting settings = settingsService.getMailQueueSettings();
         Integer batchSize = settings.getBatchSize();
         List<Mail> queuedMails = mailRepo.findAllByStatusInOrderByCreatedDate(Set.of(Mail.Status.QUEUED, Mail.Status.FAILED), PageRequest.of(0, batchSize));
-        log.info("{} queued mails found", queuedMails.size());
+        log.debug("{} queued mails found", queuedMails.size());
         for (Mail mail : queuedMails) {
             try {
                 sendEmail(mail.getFromName(), mail.getToAddress(), mail.getSubject(), mail.getBody(), mail.getReplyToAddress());

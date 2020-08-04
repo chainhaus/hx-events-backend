@@ -47,7 +47,7 @@ public class MailScheduler implements SchedulingConfigurer {
                     nextExecutionTime.setTime(lastActualExecutionTime != null ? lastActualExecutionTime : new Date());
                     nextExecutionTime.add(Calendar.MINUTE, settings.getInterval());
                     Date time = nextExecutionTime.getTime();
-                    log.info("Next Mail queue run scheduled at {}", time);
+                    log.debug("Next Mail queue run scheduled at {}", time);
                     return time;
                 }
         );
