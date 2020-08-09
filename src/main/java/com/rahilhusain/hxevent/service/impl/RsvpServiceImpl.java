@@ -4,9 +4,8 @@ import com.microsoft.graph.authentication.IAuthenticationProvider;
 import com.microsoft.graph.models.generated.ResponseType;
 import com.rahilhusain.hxevent.domain.Event;
 import com.rahilhusain.hxevent.domain.EventAttendee;
-import com.rahilhusain.hxevent.domain.EventAttendee.Status;
 import com.rahilhusain.hxevent.domain.Mail;
-import com.rahilhusain.hxevent.dto.ApproveRsvpRequest;
+import com.rahilhusain.hxevent.dto.UpdateRsvpRequest;
 import com.rahilhusain.hxevent.dto.rsvp.RsvpDto;
 import com.rahilhusain.hxevent.mappers.GraphMapper;
 import com.rahilhusain.hxevent.repo.EventAttendeeRepo;
@@ -78,7 +77,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Override
     public void updateAttendeeStatus(Page<RsvpDto> page) {
         Map<Long, RsvpDto.EventDto> eventMap = new HashMap<>();
-        page.get().filter(attendee -> attendee.getStatus() == Status.RSVP_APPROVED || attendee.getStatus() == Status.CALENDER_SENT)
+        page.get().filter(RsvpDto::getCalenderSent)
                 .map(RsvpDto::getEvent)
                 .filter(e -> e.getExternalId() != null)
                 .forEach(e -> eventMap.put(e.getId(), e));
@@ -91,23 +90,19 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Transactional
     public void updateAttendeeStatus(RsvpDto.EventDto event) {
         Map<String, ResponseType> attendees = getCalenderEventAttendeesStatus(event.getExternalId());
-        List<EventAttendee> pendingAttendees = attendeeRepo.findAllByEventIdAndStatusIn(event.getId(), Status.RSVP_APPROVED, Status.CALENDER_SENT);
+        List<EventAttendee> pendingAttendees = attendeeRepo.findAllByEventIdAndCalenderSentTrue(event.getId());
         pendingAttendees.forEach((entity) -> {
             ResponseType newStatus = attendees.get(entity.getEmail());
             if (newStatus != null) {
                 switch (newStatus) {
                     case ACCEPTED, TENTATIVELY_ACCEPTED -> {
-                        log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_ACCEPTED);
-                        entity.setStatus(Status.CALENDER_ACCEPTED);
+                        log.info("Updating status of attendee {} for the event {} to CALENDER_ACCEPTED", entity.getEmail(), event.getTitle());
+                        entity.setCalenderAccepted(true);
                     }
                     case DECLINED -> {
-                        log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_DECLINED);
-                        entity.setStatus(Status.CALENDER_DECLINED);
+                        log.info("Updating status of attendee {} for the event {} to CALENDER_DECLINED", entity.getEmail(), event.getTitle());
+                        entity.setCalenderDeclined(true);
                     }
-                }
-                if (entity.getStatus() == Status.RSVP_APPROVED) {
-                    log.info("Updating status of attendee {} for the event {} to {}", entity.getEmail(), event.getTitle(), Status.CALENDER_SENT);
-                    entity.setStatus(Status.CALENDER_SENT);
                 }
                 attendeeRepo.save(entity);
             } else {
@@ -117,39 +112,46 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     }
 
     @Override
-    public void replyInvitation(String invitationId, String reply) {
+    public void replyInvitation(String invitationToken, String reply) {
+        EventAttendee attendee = findEventAttendee(invitationToken);
+        if (attendee.getRsvpAccepted() || attendee.getRsvpDeclined()) {
+            var msg = attendee.getRsvpAccepted() ? "RSVP_ACCEPTED" : "RSVP_DECLINED";
+            throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
+        }
         if ("accept".equalsIgnoreCase(reply)) {
-            updateStatus(invitationId, Status.RSVP_ACCEPTED, Status.RSVP_SENT);
+            attendee.setRsvpAccepted(true);
         } else if ("decline".equalsIgnoreCase(reply)) {
-            updateStatus(invitationId, Status.RSVP_DECLINED, Status.RSVP_SENT);
+            attendee.setRsvpDeclined(true);
         }
     }
 
     @Override
     @Transactional
-    public void approveInvitation(ApproveRsvpRequest request) {
+    public void updateRsvpStatus(UpdateRsvpRequest request) {
         request.getInvitationIds().forEach((eventId, value) -> {
             Event event = eventRepo.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event Not found:" + eventId));
-            List<UUID> invitationIds = value.stream().map(UUID::fromString).collect(Collectors.toList());
-            List<EventAttendee> attendees = attendeeRepo.findAllById(invitationIds);
+            List<EventAttendee> attendees = attendeeRepo.findAllById(value);
             String subject = "Confirmation for event - " + event.getTitle();
             Context context = new Context();
             context.setVariable("event", event);
             for (EventAttendee attendee : attendees) {
                 context.setVariable("attendee", attendee);
-                if (attendee.getStatus() == Status.RSVP_SENT || attendee.getStatus() == Status.RSVP_ACCEPTED || attendee.getStatus() == Status.RSVP_DECLINED) {
-                    attendee.setStatus(request.isRejected() ? Status.RSVP_REJECTED : Status.RSVP_APPROVED);
-                }
-                if (attendee.getStatus() == Status.RSVP_APPROVED) {
-                    String content = templateEngine.process("rsvp-approved", context);
-                    Mail mail = new Mail();
-                    mail.setSubject(subject);
-                    mail.setBody(content);
-                    mail.setAttendee(attendee);
-                    mail.setFromName("HX-Events");
-                    mail.setToAddress(attendee.getEmail());
-                    mail.setType(Mail.Type.APPROVED);
-                    mailService.queueMail(mail);
+                switch (request.getAction()) {
+                    case APPROVE -> {
+                        attendee.setRsvpApproved(true);
+                        String content = templateEngine.process("rsvp-approved", context);
+                        Mail mail = new Mail();
+                        mail.setSubject(subject);
+                        mail.setBody(content);
+                        mail.setAttendee(attendee);
+                        mail.setFromName("HX-Events");
+                        mail.setToAddress(attendee.getEmail());
+                        mail.setType(Mail.Type.APPROVED);
+                        mailService.queueMail(mail);
+                    }
+                    case REJECT -> attendee.setRsvpRejected(true);
+                    case FORCE_ACCEPT -> attendee.setRsvpAccepted(true);
+                    case FORCE_DECLINE -> attendee.setRsvpDeclined(true);
                 }
             }
         });
@@ -171,7 +173,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             Map<String, String> attendeeMap = emailIds.stream().collect(Collectors.toMap(Function.identity(), Function.identity()));
             updateCalenderEvent(externalId, attendeeMap);
         }
-        attendee.forEach(a -> a.setStatus(Status.CALENDER_SENT));
+        attendee.forEach(a -> a.setCalenderSent(true));
         attendeeRepo.saveAll(attendee);
     }
 
@@ -213,26 +215,15 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         return map;
     }
 
-    @Transactional
-    public void updateStatus(String invitationId, Status newStatus, Status oldStatus) {
+    public EventAttendee findEventAttendee(String invitationToken) {
         UUID uuid;
         try {
-            uuid = UUID.fromString(invitationId);
+            uuid = UUID.fromString(invitationToken);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation Not found.");
         }
-        EventAttendee attendee = attendeeRepo.findById(uuid)
+        return attendeeRepo.findOneByToken(uuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation Not found."));
-        updateAttendeeStatus(newStatus, oldStatus, attendee);
-    }
-
-    public void updateAttendeeStatus(Status newStatus, Status oldStatus, EventAttendee attendee) {
-        if (attendee.getStatus() == oldStatus) {
-            attendee.setStatus(newStatus);
-            attendeeRepo.save(attendee);
-        } else {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, attendee.getStatus().name());
-        }
     }
 
 }

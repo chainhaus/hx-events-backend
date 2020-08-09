@@ -92,7 +92,7 @@ public class EventServiceImpl implements EventService {
             attendee.setEvent(event);
             eventAttendeeRepo.save(attendee);
             String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getId().toString())
+                    .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getToken().toString())
                     .build().toUri().toString();
             context.setVariable("url", url);
             String content = templateEngine.process("rsvp-invitation", context);

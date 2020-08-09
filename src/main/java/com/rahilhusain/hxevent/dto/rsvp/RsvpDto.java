@@ -1,12 +1,8 @@
 package com.rahilhusain.hxevent.dto.rsvp;
 
-import com.rahilhusain.hxevent.domain.EventAttendee;
-
-import java.util.UUID;
-
 public interface RsvpDto {
 
-    UUID getId();
+    Long getId();
 
     String getEmail();
 
@@ -14,7 +10,19 @@ public interface RsvpDto {
 
     String getCompanyName();
 
-    EventAttendee.Status getStatus();
+    Boolean getRsvpAccepted();
+
+    Boolean getRsvpDeclined();
+
+    Boolean getRsvpApproved();
+
+    Boolean getRsvpRejected();
+
+    Boolean getCalenderSent();
+
+    Boolean getCalenderAccepted();
+
+    Boolean getCalenderDeclined();
 
     EventDto getEvent();
 

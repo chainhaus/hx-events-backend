@@ -1,6 +1,6 @@
 package com.rahilhusain.hxevent.controllers;
 
-import com.rahilhusain.hxevent.dto.ApproveRsvpRequest;
+import com.rahilhusain.hxevent.dto.UpdateRsvpRequest;
 import com.rahilhusain.hxevent.dto.rsvp.RsvpDto;
 import com.rahilhusain.hxevent.service.RsvpService;
 import org.springframework.data.domain.Page;
@@ -41,9 +41,9 @@ public class RsvpController {
         rsvpService.replyInvitation(invitationId, reply);
     }
 
-    @PostMapping("approve")
+    @PostMapping("update-status")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void approveInvitation(@RequestBody @Valid ApproveRsvpRequest request) {
-        rsvpService.approveInvitation(request);
+    public void updateRsvpStatus(@RequestBody @Valid UpdateRsvpRequest request) {
+        rsvpService.updateRsvpStatus(request);
     }
 }

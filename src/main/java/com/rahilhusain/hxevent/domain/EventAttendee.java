@@ -7,8 +7,8 @@ import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import java.util.UUID;
@@ -19,7 +19,11 @@ import java.util.UUID;
 @NoArgsConstructor
 public class EventAttendee {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private UUID token;
 
     @Column(nullable = false)
     private String email;
@@ -29,24 +33,39 @@ public class EventAttendee {
     @Column(nullable = false)
     private String groupName;
 
+    @ColumnDefault("false")
     @Column(nullable = false, insertable = false)
-    @Enumerated(EnumType.STRING)
-    @ColumnDefault("'RSVP_SENT'")
-    private Status status;
+    private Boolean rsvpAccepted;
+
+    @ColumnDefault("false")
+    @Column(nullable = false, insertable = false)
+    private Boolean rsvpDeclined;
+
+    @ColumnDefault("false")
+    @Column(nullable = false, insertable = false)
+    private Boolean rsvpApproved;
+
+    @ColumnDefault("false")
+    @Column(nullable = false, insertable = false)
+    private Boolean rsvpRejected;
+
+    @ColumnDefault("false")
+    @Column(nullable = false, insertable = false)
+    private Boolean calenderSent;
+
+    @ColumnDefault("false")
+    @Column(nullable = false, insertable = false)
+    private Boolean calenderAccepted;
+
+    @ColumnDefault("false")
+    @Column(nullable = false, insertable = false)
+    private Boolean calenderDeclined;
 
     @ManyToOne(optional = false)
     private Event event;
 
-    @SuppressWarnings("unused")
-    public enum Status {
-        RSVP_SENT, //initial state
-        RSVP_ACCEPTED, RSVP_DECLINED,//by attendee
-        RSVP_APPROVED, RSVP_REJECTED, //by admin
-        CALENDER_SENT, CALENDER_ACCEPTED, CALENDER_DECLINED//by attendee
-    }
-
     public EventAttendee(String email, String companyName, String groupName) {
-        this.id = UUID.randomUUID();
+        this.token = UUID.randomUUID();
         this.email = email;
         this.companyName = companyName;
         this.groupName = groupName;

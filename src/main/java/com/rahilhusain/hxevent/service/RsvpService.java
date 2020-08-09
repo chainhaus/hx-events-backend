@@ -2,7 +2,7 @@ package com.rahilhusain.hxevent.service;
 
 import com.rahilhusain.hxevent.domain.Event;
 import com.rahilhusain.hxevent.domain.EventAttendee;
-import com.rahilhusain.hxevent.dto.ApproveRsvpRequest;
+import com.rahilhusain.hxevent.dto.UpdateRsvpRequest;
 import com.rahilhusain.hxevent.dto.rsvp.RsvpDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ public interface RsvpService {
 
     void replyInvitation(String invitationId, String reply);
 
-    void approveInvitation(ApproveRsvpRequest request);
+    void updateRsvpStatus(UpdateRsvpRequest request);
 
     void sendCalenderInvite(Event event, List<EventAttendee> attendee);
 
