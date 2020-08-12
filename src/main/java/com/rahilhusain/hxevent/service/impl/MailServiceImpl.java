@@ -9,7 +9,6 @@ import com.rahilhusain.hxevent.service.SettingsService;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -30,16 +29,19 @@ import static javax.mail.Message.RecipientType;
 @Service
 public class MailServiceImpl implements MailService, ApplicationContextAware {
 
-    @Autowired
-    private JavaMailSender mailSender;
-    @Autowired
-    private MailRepo mailRepo;
-    @Autowired
-    private SettingsService settingsService;
+    private final JavaMailSender mailSender;
+    private final MailRepo mailRepo;
+    private final SettingsService settingsService;
     private RsvpService rsvpService;
 
     @Value("${hx-events.app.mail.from-addr}")
     private String fromMailAddr;
+
+    public MailServiceImpl(JavaMailSender mailSender, MailRepo mailRepo, SettingsService settingsService) {
+        this.mailSender = mailSender;
+        this.mailRepo = mailRepo;
+        this.settingsService = settingsService;
+    }
 
     @SneakyThrows
     @Override
