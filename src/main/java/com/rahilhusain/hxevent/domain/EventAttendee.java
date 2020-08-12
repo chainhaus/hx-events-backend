@@ -28,6 +28,10 @@ public class EventAttendee {
     @Column(nullable = false)
     private String email;
 
+    private String firstName;
+
+    private String lastName;
+
     private String companyName;
 
     @Column(nullable = false)
@@ -64,10 +68,12 @@ public class EventAttendee {
     @ManyToOne(optional = false)
     private Event event;
 
-    public EventAttendee(String email, String companyName, String groupName) {
+    public EventAttendee(String email, String companyName, String groupName, String firstName, String lastName) {
         this.token = UUID.randomUUID();
         this.email = email;
         this.companyName = companyName;
         this.groupName = groupName;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 }

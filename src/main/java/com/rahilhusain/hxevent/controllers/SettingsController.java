@@ -1,6 +1,7 @@
 package com.rahilhusain.hxevent.controllers;
 
 import com.rahilhusain.hxevent.domain.DisplayName;
+import com.rahilhusain.hxevent.domain.NotificationRecipient;
 import com.rahilhusain.hxevent.domain.ReplyTo;
 import com.rahilhusain.hxevent.dto.MailSetting;
 import com.rahilhusain.hxevent.service.SettingsService;
@@ -41,7 +42,7 @@ public class SettingsController {
 
     @DeleteMapping("display-name/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addDisplayName(@PathVariable Integer id) {
+    public void deleteDisplayName(@PathVariable Integer id) {
         settingsService.deleteDisplayName(id);
     }
 
@@ -58,7 +59,7 @@ public class SettingsController {
 
     @DeleteMapping("reply-to/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addReplyTo(@PathVariable Integer id) {
+    public void deleteReplyTo(@PathVariable Integer id) {
         settingsService.deleteReplyTo(id);
     }
 
@@ -71,6 +72,23 @@ public class SettingsController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateMailQueueSettings(@RequestBody @Valid MailSetting mailSetting) {
         settingsService.updateMailQueueSettings(mailSetting);
+    }
+
+    @GetMapping("notification-recipient")
+    public List<NotificationRecipient> getNotificationRecipients() {
+        return settingsService.getNotificationRecipients();
+    }
+
+    @PostMapping("notification-recipient")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addNotificationRecipient(@RequestBody @Valid NotificationRecipient request) {
+        settingsService.addNotificationRecipient(request);
+    }
+
+    @DeleteMapping("notification-recipient/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNotificationRecipient(@PathVariable Integer id) {
+        settingsService.deleteNotificationRecipient(id);
     }
 
 }

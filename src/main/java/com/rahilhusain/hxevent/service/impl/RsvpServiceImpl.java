@@ -5,11 +5,13 @@ import com.microsoft.graph.models.generated.ResponseType;
 import com.rahilhusain.hxevent.domain.Event;
 import com.rahilhusain.hxevent.domain.EventAttendee;
 import com.rahilhusain.hxevent.domain.Mail;
+import com.rahilhusain.hxevent.domain.NotificationRecipient;
 import com.rahilhusain.hxevent.dto.UpdateRsvpRequest;
 import com.rahilhusain.hxevent.dto.rsvp.RsvpDto;
 import com.rahilhusain.hxevent.mappers.GraphMapper;
 import com.rahilhusain.hxevent.repo.EventAttendeeRepo;
 import com.rahilhusain.hxevent.repo.EventRepo;
+import com.rahilhusain.hxevent.repo.NotificationRecipientRepo;
 import com.rahilhusain.hxevent.service.GraphService;
 import com.rahilhusain.hxevent.service.MailService;
 import com.rahilhusain.hxevent.service.RsvpService;
@@ -23,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -45,18 +48,20 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     private final GraphMapper mapper;
     private final TemplateEngine templateEngine;
     private final MailService mailService;
+    private final NotificationRecipientRepo notificationRecipientRepo;
 
 
     @Value("${hx-events.azure.time-zone}")
     private String timeZone;
 
-    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper, TemplateEngine templateEngine, MailService mailService) {
+    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper, TemplateEngine templateEngine, MailService mailService, NotificationRecipientRepo notificationRecipientRepo) {
         this.attendeeRepo = attendeeRepo;
         this.authenticationProvider = authenticationProvider;
         this.eventRepo = eventRepo;
         this.mapper = mapper;
         this.templateEngine = templateEngine;
         this.mailService = mailService;
+        this.notificationRecipientRepo = notificationRecipientRepo;
     }
 
     @Override
@@ -120,6 +125,29 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         }
         if ("accept".equalsIgnoreCase(reply)) {
             attendee.setRsvpAccepted(true);
+            String subject = "RSVP Alert";
+            Context context = new Context();
+            context.setVariable("event", attendee.getEvent());
+            context.setVariable("attendee", attendee);
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .pathSegment("rsvp", attendee.getEvent().getId().toString(), attendee.getId().toString(), "approve")
+                    .build().toUri().toString();
+            context.setVariable("url", url);
+            String content = templateEngine.process("rsvp-alert", context);
+            List<NotificationRecipient> notificationRecipients = notificationRecipientRepo.findAll();
+            if (notificationRecipients.isEmpty()) {
+                log.warn("No recipients saved for the rsvp alert");
+            } else {
+                String recipients = notificationRecipients.stream().map(NotificationRecipient::getEmail).collect(Collectors.joining(";"));
+                Mail mail = new Mail();
+                mail.setSubject(subject);
+                mail.setBody(content);
+                mail.setAttendee(attendee);
+                mail.setFromName("HX-Events");
+                mail.setToAddress(recipients);
+                mail.setType(Mail.Type.RSVP_ALERT);
+                mailService.queueMail(mail);
+            }
         } else if ("decline".equalsIgnoreCase(reply)) {
             attendee.setRsvpDeclined(true);
         }
@@ -137,7 +165,14 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             for (EventAttendee attendee : attendees) {
                 context.setVariable("attendee", attendee);
                 switch (request.getAction()) {
-                    case APPROVE -> {
+                    case FORCE_ACCEPT:
+                        attendee.setRsvpAccepted(true);
+                    case APPROVE:
+                        if (attendee.getRsvpApproved()) {
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invitation has already been approved");
+                        } else if (attendee.getRsvpRejected()) {
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invitation has already been rejected");
+                        }
                         attendee.setRsvpApproved(true);
                         String content = templateEngine.process("rsvp-approved", context);
                         Mail mail = new Mail();
@@ -148,10 +183,18 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                         mail.setToAddress(attendee.getEmail());
                         mail.setType(Mail.Type.APPROVED);
                         mailService.queueMail(mail);
-                    }
-                    case REJECT -> attendee.setRsvpRejected(true);
-                    case FORCE_ACCEPT -> attendee.setRsvpAccepted(true);
-                    case FORCE_DECLINE -> attendee.setRsvpDeclined(true);
+                        break;
+                    case REJECT:
+                        if (attendee.getRsvpApproved()) {
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invitation has already been approved");
+                        } else if (attendee.getRsvpRejected()) {
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invitation has already been rejected");
+                        }
+                        attendee.setRsvpRejected(true);
+                        break;
+                    case FORCE_DECLINE:
+                        attendee.setRsvpDeclined(true);
+                        break;
                 }
             }
         });

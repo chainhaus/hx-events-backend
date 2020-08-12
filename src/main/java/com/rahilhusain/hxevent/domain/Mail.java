@@ -64,6 +64,6 @@ public class Mail {
     }
 
     public enum Type {
-        RSVP, APPROVED
+        RSVP, APPROVED, RSVP_ALERT
     }
 }

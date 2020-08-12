@@ -1,10 +1,12 @@
 package com.rahilhusain.hxevent.service.impl;
 
 import com.rahilhusain.hxevent.domain.DisplayName;
+import com.rahilhusain.hxevent.domain.NotificationRecipient;
 import com.rahilhusain.hxevent.domain.ReplyTo;
 import com.rahilhusain.hxevent.domain.Setting;
 import com.rahilhusain.hxevent.dto.MailSetting;
 import com.rahilhusain.hxevent.repo.DisplayNameRepo;
+import com.rahilhusain.hxevent.repo.NotificationRecipientRepo;
 import com.rahilhusain.hxevent.repo.ReplyToRepo;
 import com.rahilhusain.hxevent.repo.SettingsRepo;
 import com.rahilhusain.hxevent.service.SettingsService;
@@ -19,11 +21,13 @@ public class SettingsServiceImpl implements SettingsService {
     private final DisplayNameRepo displayNameRepo;
     private final ReplyToRepo replyToRepo;
     private final SettingsRepo settingsRepo;
+    private final NotificationRecipientRepo notificationRecipientRepo;
 
-    public SettingsServiceImpl(DisplayNameRepo displayNameRepo, ReplyToRepo replyToRepo, SettingsRepo settingsRepo) {
+    public SettingsServiceImpl(DisplayNameRepo displayNameRepo, ReplyToRepo replyToRepo, SettingsRepo settingsRepo, NotificationRecipientRepo notificationRecipientRepo) {
         this.displayNameRepo = displayNameRepo;
         this.replyToRepo = replyToRepo;
         this.settingsRepo = settingsRepo;
+        this.notificationRecipientRepo = notificationRecipientRepo;
     }
 
     @Override
@@ -76,5 +80,23 @@ public class SettingsServiceImpl implements SettingsService {
                 new Setting(Setting.Key.QUEUE_INTERVAL, mailSetting.getInterval().toString()),
                 new Setting(Setting.Key.QUEUE_BATCH_SIZE, mailSetting.getBatchSize().toString())
         ));
+    }
+
+    @Override
+    public List<NotificationRecipient> getNotificationRecipients() {
+        return notificationRecipientRepo.findAll();
+    }
+
+    @Override
+    public void addNotificationRecipient(NotificationRecipient request) {
+        if (notificationRecipientRepo.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Notification Recipient already exists");
+        }
+        notificationRecipientRepo.save(request);
+    }
+
+    @Override
+    public void deleteNotificationRecipient(Integer id) {
+        notificationRecipientRepo.deleteById(id);
     }
 }

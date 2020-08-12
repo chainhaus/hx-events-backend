@@ -10,6 +10,10 @@ public interface RsvpDto {
 
     String getCompanyName();
 
+    String getFirstName();
+
+    String getLastName();
+
     Boolean getRsvpAccepted();
 
     Boolean getRsvpDeclined();

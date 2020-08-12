@@ -35,10 +35,10 @@ public class RsvpController {
         return rsvpService.findByEventId(eventId, pageable);
     }
 
-    @PostMapping("{invitationId}/reply/{reply:accept|decline}")
+    @PostMapping("{invitationToken}/reply/{reply:accept|decline}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void replyRsvp(@PathVariable String invitationId, @PathVariable String reply) {
-        rsvpService.replyInvitation(invitationId, reply);
+    public void replyRsvp(@PathVariable String invitationToken, @PathVariable String reply) {
+        rsvpService.replyInvitation(invitationToken, reply);
     }
 
     @PostMapping("update-status")

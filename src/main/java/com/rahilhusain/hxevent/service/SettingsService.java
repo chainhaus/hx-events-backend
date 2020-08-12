@@ -1,6 +1,7 @@
 package com.rahilhusain.hxevent.service;
 
 import com.rahilhusain.hxevent.domain.DisplayName;
+import com.rahilhusain.hxevent.domain.NotificationRecipient;
 import com.rahilhusain.hxevent.domain.ReplyTo;
 import com.rahilhusain.hxevent.dto.MailSetting;
 
@@ -22,4 +23,10 @@ public interface SettingsService {
     MailSetting getMailQueueSettings();
 
     void updateMailQueueSettings(MailSetting mailSetting);
+
+    List<NotificationRecipient> getNotificationRecipients();
+
+    void addNotificationRecipient(NotificationRecipient request);
+
+    void deleteNotificationRecipient(Integer id);
 }

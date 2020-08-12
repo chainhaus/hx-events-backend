@@ -77,11 +77,12 @@ public interface GraphMapper {
 
     default Stream<EventAttendee> mapMemberMailsResponse(IDirectoryObjectCollectionWithReferencesPage source, String groupName) {
         List<DirectoryObject> page = source.getCurrentPage();
-        return page.stream().map(d -> {
-            String email = d.getRawObject().get("mail").getAsString();
-            JsonElement companyName = d.getRawObject().get("companyName");
-            return new EventAttendee(email, companyName.isJsonNull() ? null : companyName.getAsString(), groupName);
-        });
+        return page.stream().map(DirectoryObject::getRawObject)
+                .map(obj -> new EventAttendee(getStringValue(obj.get("mail")), getStringValue(obj.get("companyName")), groupName, getStringValue(obj.get("givenName")), getStringValue(obj.get("surname"))));
+    }
+
+    default String getStringValue(JsonElement element) {
+        return (element != null && !element.isJsonNull()) ? element.getAsString() : null;
     }
 
     default Attendee mapAttendee(String email, String name) {

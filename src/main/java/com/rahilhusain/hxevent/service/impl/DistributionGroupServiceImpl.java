@@ -59,7 +59,7 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
             IDirectoryObjectCollectionWithReferencesPage page = this.getGraphClient().groups(group.getId())
                     .members()
                     .buildRequest()
-                    .select("mail,companyName")
+                    .select("mail,companyName,givenName,surname")
                     .get();
             return mapper.mapMemberMailsResponse(page, group.getDisplayName());
         }).collect(Collectors.toList());

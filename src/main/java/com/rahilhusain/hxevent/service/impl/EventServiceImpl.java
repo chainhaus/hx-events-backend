@@ -85,7 +85,7 @@ public class EventServiceImpl implements EventService {
         Context context = new Context();
         context.setVariable("event", event);
         if (isDevMode()) {
-            attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG"));
+            attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG", "Rahil", "Husain"));
         }
         context.setVariable("decline", request.isDecline());
         for (EventAttendee attendee : attendees) {

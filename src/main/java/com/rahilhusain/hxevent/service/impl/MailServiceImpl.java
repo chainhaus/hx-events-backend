@@ -53,7 +53,9 @@ public class MailServiceImpl implements MailService, ApplicationContextAware {
         if (replyTo != null) {
             mimeMessage.setReplyTo(new Address[]{new InternetAddress(replyTo)});
         }
-        mimeMessage.addRecipient(RecipientType.TO, new InternetAddress(recipient));
+        for (String to : recipient.split(";")) {
+            mimeMessage.addRecipient(RecipientType.TO, new InternetAddress(to));
+        }
         log.info("Sending mail with subject \"{}\" to \"{}\"", subject, recipient);
         mailSender.send(mimeMessage);
     }
