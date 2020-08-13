@@ -194,6 +194,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                         break;
                     case FORCE_DECLINE:
                         attendee.setRsvpDeclined(true);
+                        attendee.setRsvpAccepted(false);
                         break;
                 }
             }
