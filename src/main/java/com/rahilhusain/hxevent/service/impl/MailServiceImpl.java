@@ -8,10 +8,9 @@ import com.rahilhusain.hxevent.service.RsvpService;
 import com.rahilhusain.hxevent.service.SettingsService;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -27,11 +26,15 @@ import static javax.mail.Message.RecipientType;
 
 @Log4j2
 @Service
-public class MailServiceImpl implements MailService, ApplicationContextAware {
+public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
     private final MailRepo mailRepo;
     private final SettingsService settingsService;
+
+    @Lazy
+    @Autowired
+    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     private RsvpService rsvpService;
 
     @Value("${hx-events.app.mail.from-addr}")
@@ -85,10 +88,5 @@ public class MailServiceImpl implements MailService, ApplicationContextAware {
             }
             mailRepo.save(mail);
         }
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.rsvpService = applicationContext.getBean(RsvpService.class);
     }
 }
