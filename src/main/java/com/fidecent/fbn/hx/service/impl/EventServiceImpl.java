@@ -1,5 +1,6 @@
 package com.fidecent.fbn.hx.service.impl;
 
+import com.fidecent.fbn.hx.HashUtils;
 import com.fidecent.fbn.hx.domain.Event;
 import com.fidecent.fbn.hx.domain.EventAttendee;
 import com.fidecent.fbn.hx.domain.Mail;
@@ -26,8 +27,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -89,10 +89,11 @@ public class EventServiceImpl implements EventService {
         }
         context.setVariable("decline", request.isDecline());
         for (EventAttendee attendee : attendees) {
+            attendee.setToken(HashUtils.generateHash(attendee.getEmail(), event.getDate(), event.getStartTime(), event.getEndTime(), event.getTitle()));
             attendee.setEvent(event);
             eventAttendeeRepo.save(attendee);
             String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getToken().toString())
+                    .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getToken())
                     .build().toUri().toString();
             context.setVariable("url", url);
             String content = templateEngine.process("rsvp-invitation", context);

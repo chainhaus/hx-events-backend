@@ -11,14 +11,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 public interface EventAttendeeRepo extends JpaRepository<EventAttendee, Long> {
     Page<RsvpDto> findAllProjectedBy(Pageable pageable);
 
     Page<RsvpDto> findAllByEventId(Long eventId, Pageable pageable);
 
-    Optional<EventAttendee> findOneByToken(UUID uuid);
+    Optional<EventAttendee> findOneByToken(String token);
 
     @Query("SELECT a.email FROM EventAttendee a JOIN a.event e WHERE e.externalId = :externalId AND a.calenderSent = true")
     Set<String> findAllInvitedAttendeesForCalenderEvent(@Param("externalId") String externalId);

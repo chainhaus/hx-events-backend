@@ -1,11 +1,17 @@
 package com.fidecent.fbn.hx.domain;
 
-import lombok.*;
-import org.hibernate.annotations.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Formula;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.*;
-import java.util.*;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
 @Getter
@@ -17,7 +23,7 @@ public class EventAttendee {
     private Long id;
 
     @Column(nullable = false)
-    private UUID token;
+    private String token;
 
     @Column(nullable = false)
     private String email;
@@ -75,7 +81,6 @@ public class EventAttendee {
     private Event event;
 
     public EventAttendee(String email, String companyName, String groupName, String firstName, String lastName) {
-        this.token = UUID.randomUUID();
         this.email = email;
         this.companyName = companyName;
         this.groupName = groupName;

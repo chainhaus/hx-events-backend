@@ -1,7 +1,5 @@
 package com.fidecent.fbn.hx.service.impl;
 
-import com.microsoft.graph.authentication.IAuthenticationProvider;
-import com.microsoft.graph.models.generated.ResponseType;
 import com.fidecent.fbn.hx.domain.Event;
 import com.fidecent.fbn.hx.domain.EventAttendee;
 import com.fidecent.fbn.hx.domain.Mail;
@@ -15,6 +13,8 @@ import com.fidecent.fbn.hx.repo.NotificationRecipientRepo;
 import com.fidecent.fbn.hx.service.GraphService;
 import com.fidecent.fbn.hx.service.MailService;
 import com.fidecent.fbn.hx.service.RsvpService;
+import com.microsoft.graph.authentication.IAuthenticationProvider;
+import com.microsoft.graph.models.generated.ResponseType;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -260,13 +259,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     }
 
     public EventAttendee findEventAttendee(String invitationToken) {
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(invitationToken);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation Not found.");
-        }
-        return attendeeRepo.findOneByToken(uuid)
+        return attendeeRepo.findOneByToken(invitationToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation Not found."));
     }
 
