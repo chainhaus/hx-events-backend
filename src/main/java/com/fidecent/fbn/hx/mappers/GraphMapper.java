@@ -1,7 +1,12 @@
 package com.fidecent.fbn.hx.mappers;
 
+import com.fidecent.fbn.hx.domain.Event;
+import com.fidecent.fbn.hx.domain.EventAttendee;
+import com.fidecent.fbn.hx.dto.groups.DistributionGroupDto;
 import com.google.gson.JsonElement;
 import com.microsoft.graph.models.extensions.Attendee;
+import com.microsoft.graph.models.extensions.Contact;
+import com.microsoft.graph.models.extensions.ContactFolder;
 import com.microsoft.graph.models.extensions.DateTimeTimeZone;
 import com.microsoft.graph.models.extensions.DirectoryObject;
 import com.microsoft.graph.models.extensions.EmailAddress;
@@ -9,11 +14,10 @@ import com.microsoft.graph.models.extensions.Group;
 import com.microsoft.graph.models.extensions.ItemBody;
 import com.microsoft.graph.models.generated.AttendeeType;
 import com.microsoft.graph.options.QueryOption;
+import com.microsoft.graph.requests.extensions.IContactCollectionPage;
+import com.microsoft.graph.requests.extensions.IContactFolderCollectionPage;
 import com.microsoft.graph.requests.extensions.IDirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionPage;
-import com.fidecent.fbn.hx.domain.Event;
-import com.fidecent.fbn.hx.domain.EventAttendee;
-import com.fidecent.fbn.hx.dto.groups.DistributionGroupDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
@@ -39,6 +43,8 @@ public interface GraphMapper {
 
     List<DistributionGroupDto> mapGroups(List<Group> groups);
 
+    List<DistributionGroupDto> mapContactFolder(List<ContactFolder> folders);
+
     default Optional<QueryOption> mapSortParam(Sort sort) {
         return Optional.ofNullable(sort).filter(Sort::isSorted)
                 .map(Sort::get)
@@ -62,6 +68,11 @@ public interface GraphMapper {
         return applyPagination(pageable, data);
     }
 
+    default Page<DistributionGroupDto> mapContactFolderResponse(IContactFolderCollectionPage page, Pageable pageable) {
+        List<DistributionGroupDto> data = mapContactFolder(page.getCurrentPage());
+        return applyPagination(pageable, data);
+    }
+
     private <T> Page<T> applyPagination(Pageable pageable, List<T> data) {
         int totalElements = data.size();
         if (pageable.isPaged()) {
@@ -79,6 +90,12 @@ public interface GraphMapper {
         List<DirectoryObject> page = source.getCurrentPage();
         return page.stream().map(DirectoryObject::getRawObject)
                 .map(obj -> new EventAttendee(getStringValue(obj.get("mail")), getStringValue(obj.get("companyName")), groupName, getStringValue(obj.get("givenName")), getStringValue(obj.get("surname"))));
+    }
+
+    default Stream<EventAttendee> mapMemberMailsResponse(IContactCollectionPage source, String groupName) {
+        List<Contact> page = source.getCurrentPage();
+        return page.stream()
+                .map(obj -> new EventAttendee(obj.emailAddresses.get(0).address, obj.companyName, groupName, obj.givenName, obj.surname));
     }
 
     default String getStringValue(JsonElement element) {
