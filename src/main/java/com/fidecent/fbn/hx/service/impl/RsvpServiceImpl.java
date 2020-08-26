@@ -143,7 +143,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                 mail.setSubject(subject);
                 mail.setBody(content);
                 mail.setAttendee(attendee);
-                mail.setFromName("HX-Events");
+                mail.setFromName("FBN Events");
                 mail.setToAddress(recipients);
                 mail.setType(Mail.Type.RSVP_ALERT);
                 mailService.queueMail(mail);
@@ -179,7 +179,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                         mail.setSubject(subject);
                         mail.setBody(content);
                         mail.setAttendee(attendee);
-                        mail.setFromName("HX-Events");
+                        mail.setFromName("FBN Events");
                         mail.setToAddress(attendee.getEmail());
                         mail.setType(Mail.Type.APPROVED);
                         mailService.queueMail(mail);

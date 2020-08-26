@@ -2,6 +2,10 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.thymeleaf.org ">
 You are invited to "[(${event.title})]" on [(${event.date})] at [(${event.startTime})].
+
+Event Description: [(${event.description})]
+
+
 <p style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;"><a
         th:href="${url}+'/accept'"
         class="btn btn-primary"
