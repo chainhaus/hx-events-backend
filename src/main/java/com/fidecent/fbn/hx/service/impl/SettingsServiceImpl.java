@@ -69,7 +69,7 @@ public class SettingsServiceImpl implements SettingsService {
     @Override
     public MailSetting getMailQueueSettings() {
         List<Setting> settings = settingsRepo.findAllById(List.of(Setting.Key.QUEUE_INTERVAL, Setting.Key.QUEUE_BATCH_SIZE));
-        Integer interval = settings.stream().filter(s -> s.getKey() == Setting.Key.QUEUE_INTERVAL).map(Setting::getValue).findAny().map(Integer::valueOf).orElse(5);
+        Integer interval = settings.stream().filter(s -> s.getKey() == Setting.Key.QUEUE_INTERVAL).map(Setting::getValue).findAny().map(Integer::valueOf).orElse(60);
         Integer batchSize = settings.stream().filter(s -> s.getKey() == Setting.Key.QUEUE_BATCH_SIZE).map(Setting::getValue).findAny().map(Integer::valueOf).orElse(100);
         return new MailSetting(batchSize, interval);
     }

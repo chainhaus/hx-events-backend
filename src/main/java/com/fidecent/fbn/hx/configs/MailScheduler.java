@@ -45,7 +45,7 @@ public class MailScheduler implements SchedulingConfigurer {
                     Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
                     Calendar nextExecutionTime = new GregorianCalendar();
                     nextExecutionTime.setTime(lastActualExecutionTime != null ? lastActualExecutionTime : new Date());
-                    nextExecutionTime.add(Calendar.MINUTE, settings.getInterval());
+                    nextExecutionTime.add(Calendar.SECOND, settings.getInterval());
                     Date time = nextExecutionTime.getTime();
                     log.debug("Next Mail queue run scheduled at {}", time);
                     return time;

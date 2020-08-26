@@ -116,6 +116,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     }
 
     @Override
+    @Transactional
     public void replyInvitation(String invitationToken, String reply) {
         EventAttendee attendee = findEventAttendee(invitationToken);
         if (attendee.getRsvpAccepted() || attendee.getRsvpDeclined()) {

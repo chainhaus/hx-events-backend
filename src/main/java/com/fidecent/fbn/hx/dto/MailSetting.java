@@ -21,6 +21,5 @@ public class MailSetting {
 
     @NotNull
     @Min(1)
-    @Max(60)
-    private Integer interval;//in minutes
+    private Integer interval;//in seconds
 }

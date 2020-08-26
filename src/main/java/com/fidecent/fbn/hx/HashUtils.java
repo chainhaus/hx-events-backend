@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
 
 import java.security.MessageDigest;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,7 +25,7 @@ public class HashUtils implements ApplicationContextAware {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         String random = saltPhrase + RandomUtils.nextInt(tokenHashMin, tokenHashMax);
         String input = random + Stream.of(inputs).filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining(":"));
-        return bytesToHex(md.digest(input.getBytes()));
+        return bytesToHex(md.digest(input.getBytes())) + UUID.randomUUID().toString().replaceAll("-", "");
     }
 
     public static String bytesToHex(byte[] bytes) {
