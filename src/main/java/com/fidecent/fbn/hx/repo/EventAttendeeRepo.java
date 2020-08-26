@@ -19,7 +19,7 @@ public interface EventAttendeeRepo extends JpaRepository<EventAttendee, Long> {
 
     Optional<EventAttendee> findOneByToken(String token);
 
-    @Query("SELECT a.email FROM EventAttendee a JOIN a.event e WHERE e.externalId = :externalId AND a.calenderSent = true")
+    @Query("SELECT a.email FROM EventAttendee a JOIN a.event e WHERE e.externalId = :externalId AND a.approvalMailSent = true")
     Set<String> findAllInvitedAttendeesForCalenderEvent(@Param("externalId") String externalId);
 
     List<EventAttendee> findAllByEventIdAndCalenderSentTrue(Long id);
