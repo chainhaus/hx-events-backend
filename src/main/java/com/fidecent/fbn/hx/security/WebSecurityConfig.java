@@ -42,7 +42,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(appRoleAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/rsvp/{invitationId}/reply").permitAll()
+                .antMatchers("/api/rsvp/{invitationId}/reply/**").permitAll()
                 .antMatchers("/api/**").authenticated()
                 .antMatchers("/**").permitAll();
     }
