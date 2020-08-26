@@ -15,7 +15,7 @@ public class CreateEventRequest {
     private String title;
 
     @NotBlank
-    @Length(max = 5000)
+    @Length(max = 10000)
     private String description;
 
     @NotBlank

@@ -31,7 +31,7 @@ public class Event {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = false, length = 1000)
+    @Column(nullable = false, length = 10000)
     private String description;
 
     @Column(nullable = false, length = 50)
