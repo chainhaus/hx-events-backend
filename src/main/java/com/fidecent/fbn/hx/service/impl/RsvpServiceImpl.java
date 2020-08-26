@@ -96,7 +96,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         Map<String, ResponseType> attendees = getCalenderEventAttendeesStatus(event.getExternalId());
         List<EventAttendee> pendingAttendees = attendeeRepo.findAllByEventIdAndCalenderSentTrue(event.getId());
         pendingAttendees.forEach((entity) -> {
-            ResponseType newStatus = attendees.get(entity.getEmail());
+            ResponseType newStatus = attendees.get(entity.getEmail().toLowerCase());
             if (newStatus != null) {
                 switch (newStatus) {
                     case ACCEPTED, TENTATIVELY_ACCEPTED -> {
@@ -255,7 +255,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                 .get().attendees
                 .forEach(attendee -> Optional.ofNullable(attendee.emailAddress)
                         .map(add -> add.address)
-                        .ifPresent(key -> map.put(key, Optional.of(attendee.status).map(s -> s.response).orElse(ResponseType.NONE))));
+                        .ifPresent(key -> map.put(key.toLowerCase(), Optional.of(attendee.status).map(s -> s.response).orElse(ResponseType.NONE))));
         return map;
     }
 
