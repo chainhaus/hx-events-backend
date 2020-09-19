@@ -151,6 +151,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         } else if ("decline".equalsIgnoreCase(reply)) {
             attendee.setRsvpDeclined(true);
         }
+        attendee.setRsvpMailOpened(true);
     }
 
     @Override
@@ -224,8 +225,8 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Override
     @Transactional
     public void markOpened(String invitationToken) {
-        EventAttendee attendee = findEventAttendee(invitationToken);
         log.info("Mail opened : {}", invitationToken);
+        EventAttendee attendee = findEventAttendee(invitationToken);
         if (!attendee.getRsvpMailOpened()) {
             attendee.setRsvpMailOpened(true);
         }
