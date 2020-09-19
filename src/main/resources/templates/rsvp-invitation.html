@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.thymeleaf.org ">
-<img th:src="${trackUrl}" style="display: none">
 You are invited to "[(${event.title})]" on [(${event.date})] at [(${event.startTime})].
 
 Event Description: [(${event.description})]
@@ -17,4 +16,5 @@ Event Description: [(${event.description})]
         class="btn btn-primary"
         style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;text-decoration: none;color: #ffffff;padding: 10px 15px;display: inline-block;border-radius: 5px;background: #17bebb;">Decline</a>
 </p>
+<img th:src="${trackUrl}" style="height: 1px;width: 1px;"/>
 </html>
