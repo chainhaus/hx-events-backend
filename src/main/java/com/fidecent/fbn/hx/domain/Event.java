@@ -67,7 +67,7 @@ public class Event {
     private Integer totalInvitations;
 
     public String getOpenedInvitationPercent() {
-        return DecimalFormat.getPercentInstance().format((double) openedInvitations / (totalInvitations == 0 ? 1 : totalInvitations));
+        return DecimalFormat.getPercentInstance().format(((double) (openedInvitations == null ? 0 : openedInvitations)) / (totalInvitations == null || totalInvitations == 0 ? 1 : totalInvitations));
     }
 
 }
