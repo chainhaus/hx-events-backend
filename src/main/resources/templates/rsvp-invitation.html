@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.thymeleaf.org ">
+<img th:src="${trackUrl}" style="display: none">
 You are invited to "[(${event.title})]" on [(${event.date})] at [(${event.startTime})].
 
 Event Description: [(${event.description})]

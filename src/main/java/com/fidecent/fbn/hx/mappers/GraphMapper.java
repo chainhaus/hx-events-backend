@@ -28,9 +28,7 @@ import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,8 +92,10 @@ public interface GraphMapper {
 
     default Stream<EventAttendee> mapMemberMailsResponse(IContactCollectionPage source, String groupName) {
         List<Contact> page = source.getCurrentPage();
+        Set<String> processed = new HashSet<>();
         return page.stream()
-                .map(obj -> new EventAttendee(obj.emailAddresses.get(0).address, obj.companyName, groupName, obj.givenName, obj.surname));
+                .map(obj -> new EventAttendee(obj.emailAddresses.get(0).address, obj.companyName, groupName, obj.givenName, obj.surname))
+                .filter(a -> processed.add(a.getEmail().toLowerCase()));
     }
 
     default String getStringValue(JsonElement element) {

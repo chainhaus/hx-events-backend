@@ -24,4 +24,5 @@ public interface RsvpService {
 
     void sendCalenderInvite(Event event, List<EventAttendee> attendee);
 
+    void markOpened(String invitationToken);
 }

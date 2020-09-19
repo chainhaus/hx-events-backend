@@ -41,6 +41,12 @@ public class RsvpController {
         rsvpService.replyInvitation(invitationToken, reply);
     }
 
+    @GetMapping("{invitationToken}/open.png")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void onMailInvitationOpened(@PathVariable String invitationToken) {
+        rsvpService.markOpened(invitationToken);
+    }
+
     @PostMapping("update-status")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRsvpStatus(@RequestBody @Valid UpdateRsvpRequest request) {

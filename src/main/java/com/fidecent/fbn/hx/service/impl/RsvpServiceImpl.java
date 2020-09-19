@@ -221,6 +221,16 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         attendeeRepo.saveAll(attendee);
     }
 
+    @Override
+    @Transactional
+    public void markOpened(String invitationToken) {
+        EventAttendee attendee = findEventAttendee(invitationToken);
+        log.info("Mail opened : {}", invitationToken);
+        if (!attendee.getRsvpMailOpened()) {
+            attendee.setRsvpMailOpened(true);
+        }
+    }
+
     public com.microsoft.graph.models.extensions.Event createCalenderEvent(Event event, Map<String, String> attendee) {
         com.microsoft.graph.models.extensions.Event calenderEvent = mapper.mapCalenderEvent(event);
         calenderEvent.start = mapper.mapDateTime(event.getDate(), event.getStartTime(), timeZone);

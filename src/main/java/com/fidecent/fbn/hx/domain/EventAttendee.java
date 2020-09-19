@@ -45,6 +45,10 @@ public class EventAttendee {
 
     @ColumnDefault("false")
     @Column(nullable = false, insertable = false)
+    private Boolean rsvpMailOpened;
+
+    @ColumnDefault("false")
+    @Column(nullable = false, insertable = false)
     private Boolean rsvpAccepted;
 
     @ColumnDefault("false")

@@ -84,9 +84,10 @@ public class EventServiceImpl implements EventService {
         String subject = "Invitation for event - " + event.getTitle();
         Context context = new Context();
         context.setVariable("event", event);
-        if (isDevMode()) {
+//        if (isDevMode()) {
+  //          attendees.clear();
             attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG", "Rahil", "Husain"));
-        }
+    //    }
         context.setVariable("decline", request.isDecline());
         for (EventAttendee attendee : attendees) {
             attendee.setToken(HashUtils.generateHash(attendee.getEmail(), event.getDate(), event.getStartTime(), event.getEndTime(), event.getTitle()));
@@ -96,6 +97,10 @@ public class EventServiceImpl implements EventService {
                     .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getToken())
                     .build().toUri().toString();
             context.setVariable("url", url);
+            String trackUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .pathSegment("api", "rsvp", attendee.getToken(), "open.png")
+                    .build().toUri().toString();
+            context.setVariable("trackUrl", trackUrl);
             String content = templateEngine.process("rsvp-invitation", context);
             Mail mail = new Mail();
             mail.setSubject(subject);

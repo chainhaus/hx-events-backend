@@ -14,4 +14,5 @@ public class EventDto {
     private LocalTime startTime;
     private LocalTime endTime;
     private String createdBy;
+    private String openedInvitationPercent;
 }

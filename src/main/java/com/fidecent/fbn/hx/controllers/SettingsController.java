@@ -6,6 +6,7 @@ import com.fidecent.fbn.hx.domain.ReplyTo;
 import com.fidecent.fbn.hx.dto.MailSetting;
 import com.fidecent.fbn.hx.service.SettingsService;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.javamail.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.mail.internet.*;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -89,6 +91,9 @@ public class SettingsController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNotificationRecipient(@PathVariable Integer id) {
         settingsService.deleteNotificationRecipient(id);
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        javaMailSender.send(mimeMessage);
     }
 
 }

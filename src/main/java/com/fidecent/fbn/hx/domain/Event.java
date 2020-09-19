@@ -2,6 +2,7 @@ package com.fidecent.fbn.hx.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -12,6 +13,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.text.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,7 +33,8 @@ public class Event {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = false, length = 10000)
+    @Column(nullable = false)
+    @Type(type="text")
     private String description;
 
     @Column(nullable = false, length = 50)
@@ -56,5 +59,15 @@ public class Event {
     @CreatedBy
     @Column(nullable = false)
     private String createdBy;
+
+    @Formula("select count(*) from event_attendee a where a.event_id = id and a.rsvp_mail_opened = true")
+    private Integer openedInvitations;
+
+    @Formula("select count(*) from event_attendee a where a.event_id = id")
+    private Integer totalInvitations;
+
+    public String getOpenedInvitationPercent() {
+        return DecimalFormat.getPercentInstance().format((double) openedInvitations / (totalInvitations == 0 ? 1 : totalInvitations));
+    }
 
 }
