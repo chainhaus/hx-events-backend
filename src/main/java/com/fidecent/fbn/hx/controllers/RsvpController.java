@@ -3,9 +3,11 @@ package com.fidecent.fbn.hx.controllers;
 import com.fidecent.fbn.hx.dto.UpdateRsvpRequest;
 import com.fidecent.fbn.hx.dto.rsvp.RsvpDto;
 import com.fidecent.fbn.hx.service.RsvpService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,10 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("api/rsvp")
 public class RsvpController {
+
+    @Value("classpath:/copyright.png")
+    private Resource copyrightFile;
+
     private final RsvpService rsvpService;
 
     public RsvpController(RsvpService rsvpService) {
@@ -41,10 +47,10 @@ public class RsvpController {
         rsvpService.replyInvitation(invitationToken, reply);
     }
 
-    @GetMapping("{invitationToken}/open.png")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void onMailInvitationOpened(@PathVariable String invitationToken) {
+    @GetMapping(path = "{invitationToken}/copyright.png", produces = MediaType.IMAGE_PNG_VALUE)
+    public Resource onMailInvitationOpened(@PathVariable String invitationToken) {
         rsvpService.markOpened(invitationToken);
+        return copyrightFile;
     }
 
     @PostMapping("update-status")

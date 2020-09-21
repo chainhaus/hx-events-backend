@@ -43,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/rsvp/{invitationId}/reply/**").permitAll()
-                .antMatchers("/api/rsvp/{invitationId}/open.png").permitAll()
+                .antMatchers("/api/rsvp/{invitationId}/copyright.png").permitAll()
                 .antMatchers("/api/**").authenticated()
                 .antMatchers("/**").permitAll();
     }

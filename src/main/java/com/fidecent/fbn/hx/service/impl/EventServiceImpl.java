@@ -98,7 +98,7 @@ public class EventServiceImpl implements EventService {
                     .build().toUri().toString();
             context.setVariable("url", url);
             String trackUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .pathSegment("api", "rsvp", attendee.getToken(), "open.png")
+                    .pathSegment("api", "rsvp", attendee.getToken(), "copyright.png")
                     .build().toUri().toString();
             context.setVariable("trackUrl", trackUrl);
             String content = templateEngine.process("rsvp-invitation", context);
