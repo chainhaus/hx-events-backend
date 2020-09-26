@@ -14,7 +14,7 @@ public class ServerConfig {
 
     @Bean
     public ServletWebServerFactory servletContainer() {
-        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() /*{
             @Override
             protected void postProcessContext(Context context) {
                 SecurityConstraint securityConstraint = new SecurityConstraint();
@@ -24,17 +24,17 @@ public class ServerConfig {
                 securityConstraint.addCollection(collection);
                 context.addConstraint(securityConstraint);
             }
-        };
+        }*/;
         tomcat.addAdditionalTomcatConnectors(getHttpConnector());
         return tomcat;
     }
 
     private Connector getHttpConnector() {
         Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
-        connector.setScheme("http");
+//        connector.setScheme("http");
         connector.setPort(8080);
-        connector.setSecure(false);
-        connector.setRedirectPort(8443);
+//        connector.setSecure(false);
+//        connector.setRedirectPort(8443);
         return connector;
     }
 }

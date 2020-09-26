@@ -100,7 +100,7 @@ public class EventServiceImpl implements EventService {
             String trackUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .pathSegment("api", "rsvp", attendee.getToken(), "copyright.png")
                     .build().toUri().toString();
-            context.setVariable("trackUrl", trackUrl);
+            context.setVariable("trackUrl", trackUrl.replace("https://", "http://").replace(":8443", ""));
             String content = templateEngine.process("rsvp-invitation", context);
             Mail mail = new Mail();
             mail.setSubject(subject);
