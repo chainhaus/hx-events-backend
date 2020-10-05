@@ -31,10 +31,16 @@ jobs:
         chmod 400 private_key
         mkdir ~/.ssh
         ssh-keyscan -H ${{secrets.SERVER_HOST}} > ~/.ssh/known_hosts
+        ssh -i private_key ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} <<-'ENDSSH'
+          sudo rm hx-events.jar
+          sudo rm /var/spring-apps/hx-events.jar
+        ENDSSH
         scp -i private_key target/hx-events.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:~/
         ssh -i private_key ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} <<-'ENDSSH'
           sudo systemctl stop hx-events.service
           sudo cp hx-events.jar /var/spring-apps/hx-events.jar
+          sudo chown hx-events-app-runner:hx-events-app-runner /var/spring-apps/hx-events.jar
+          sudo chmod 500 /var/spring-apps/hx-events.jar
           sudo systemctl start hx-events.service
         ENDSSH
 
