@@ -85,7 +85,6 @@ public class EventServiceImpl implements EventService {
         Context context = new Context();
         context.setVariable("event", event);
 //        if (isDevMode()) {
-  //          attendees.clear();
             attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG", "Rahil", "Husain"));
     //    }
         context.setVariable("decline", request.isDecline());
@@ -100,7 +99,7 @@ public class EventServiceImpl implements EventService {
             String trackUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .pathSegment("api", "rsvp", attendee.getToken(), "copyright.png")
                     .build().toUri().toString();
-            context.setVariable("trackUrl", trackUrl.replace("https://", "http://").replace(":8443", ""));
+            context.setVariable("trackUrl", trackUrl);
             String content = templateEngine.process("rsvp-invitation", context);
             Mail mail = new Mail();
             mail.setSubject(subject);
