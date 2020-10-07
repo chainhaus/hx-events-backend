@@ -19,7 +19,7 @@ import javax.persistence.Id;
 public class Setting {
 
     @Id
-    @Column(nullable = false, unique = true)
+    @Column(name = "`key`", nullable = false, unique = true)
     @Enumerated(EnumType.STRING)
     private Key key;
 
