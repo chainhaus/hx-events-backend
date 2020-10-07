@@ -43,23 +43,23 @@ public class EventAttendee {
     @Formula(value = "SELECT count(*)>0 FROM MAIL m WHERE m.TYPE = 'RSVP' AND m.STATUS = 'FAILED' AND m.ATTENDEE_ID = id")
     private Boolean rsvpMailFailed;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean rsvpMailOpened;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean rsvpAccepted;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean rsvpDeclined;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean rsvpApproved;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean rsvpRejected;
 
@@ -69,15 +69,15 @@ public class EventAttendee {
     @Formula(value = "SELECT count(*)>0 FROM MAIL m WHERE m.TYPE = 'APPROVED' AND m.STATUS = 'FAILED' AND m.ATTENDEE_ID = id")
     private Boolean approvalMailFailed;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean calenderSent;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean calenderAccepted;
 
-    @ColumnDefault("false")
+    @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
     private Boolean calenderDeclined;
 
