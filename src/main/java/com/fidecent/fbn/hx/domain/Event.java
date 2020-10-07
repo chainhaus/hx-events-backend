@@ -60,10 +60,10 @@ public class Event {
     @Column(nullable = false)
     private String createdBy;
 
-    @Formula("select count(*) from event_attendee a where a.event_id = id and a.rsvp_mail_opened = true")
+    @Formula("(select count(*) from event_attendee a where a.event_id = id and a.rsvp_mail_opened = true)")
     private Integer openedInvitations;
 
-    @Formula("select count(*) from event_attendee a where a.event_id = id")
+    @Formula("(select count(*) from event_attendee a where a.event_id = id)")
     private Integer totalInvitations;
 
     public String getOpenedInvitationPercent() {
