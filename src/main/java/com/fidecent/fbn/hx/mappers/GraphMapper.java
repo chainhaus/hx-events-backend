@@ -126,6 +126,6 @@ public interface GraphMapper {
 
     @SuppressWarnings("UnmappedTargetProperties")
     @Mapping(target = "content", source = ".")
-    @Mapping(target = "contentType", constant = "TEXT")
+    @Mapping(target = "contentType", constant = "HTML")
     ItemBody mapItemBody(String body);
 }
