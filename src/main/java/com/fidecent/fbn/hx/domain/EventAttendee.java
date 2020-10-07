@@ -37,10 +37,10 @@ public class EventAttendee {
     @Column(nullable = false)
     private String groupName;
 
-    @Formula(value = "SELECT count(*)>0 FROM MAIL m WHERE m.TYPE = 'RSVP' AND m.STATUS = 'SENT' AND m.ATTENDEE_ID = id")
+    @Formula(value = "(SELECT (case when count(*) > 0 then 1 else 0 end) FROM MAIL m WHERE m.TYPE = 'RSVP' AND m.STATUS = 'SENT' AND m.ATTENDEE_ID = id)")
     private Boolean rsvpMailSent;
 
-    @Formula(value = "SELECT count(*)>0 FROM MAIL m WHERE m.TYPE = 'RSVP' AND m.STATUS = 'FAILED' AND m.ATTENDEE_ID = id")
+    @Formula(value = "(SELECT (case when count(*) > 0 then 1 else 0 end) FROM MAIL m WHERE m.TYPE = 'RSVP' AND m.STATUS = 'FAILED' AND m.ATTENDEE_ID = id)")
     private Boolean rsvpMailFailed;
 
     @ColumnDefault("0")
@@ -63,10 +63,10 @@ public class EventAttendee {
     @Column(nullable = false, insertable = false)
     private Boolean rsvpRejected;
 
-    @Formula(value = "SELECT count(*)>0 FROM MAIL m WHERE m.TYPE = 'APPROVED' AND m.STATUS = 'SENT' AND m.ATTENDEE_ID = id")
+    @Formula(value = "(SELECT (case when count(*) > 0 then 1 else 0 end) FROM MAIL m WHERE m.TYPE = 'APPROVED' AND m.STATUS = 'SENT' AND m.ATTENDEE_ID = id)")
     private Boolean approvalMailSent;
 
-    @Formula(value = "SELECT count(*)>0 FROM MAIL m WHERE m.TYPE = 'APPROVED' AND m.STATUS = 'FAILED' AND m.ATTENDEE_ID = id")
+    @Formula(value = "(SELECT (case when count(*) > 0 then 1 else 0 end) FROM MAIL m WHERE m.TYPE = 'APPROVED' AND m.STATUS = 'FAILED' AND m.ATTENDEE_ID = id)")
     private Boolean approvalMailFailed;
 
     @ColumnDefault("0")
