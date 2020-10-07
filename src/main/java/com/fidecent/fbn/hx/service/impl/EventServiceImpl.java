@@ -84,9 +84,9 @@ public class EventServiceImpl implements EventService {
         String subject = "Invitation for event - " + event.getTitle();
         Context context = new Context();
         context.setVariable("event", event);
-//        if (isDevMode()) {
+        if (isDevMode()) {
             attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG", "Rahil", "Husain"));
-    //    }
+        }
         context.setVariable("decline", request.isDecline());
         for (EventAttendee attendee : attendees) {
             attendee.setToken(HashUtils.generateHash(attendee.getEmail(), event.getDate(), event.getStartTime(), event.getEndTime(), event.getTitle()));
