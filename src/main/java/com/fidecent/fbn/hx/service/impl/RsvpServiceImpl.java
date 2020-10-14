@@ -215,6 +215,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             eventRepo.save(event);
         } else {
             Set<String> emailIds = attendeeRepo.findAllInvitedAttendeesForCalenderEvent(externalId);
+            attendee.stream().map(EventAttendee::getEmail).forEach(emailIds::add);
             Map<String, String> attendeeMap = emailIds.stream().collect(Collectors.toMap(Function.identity(), Function.identity()));
             updateCalenderEvent(externalId, attendeeMap);
         }
