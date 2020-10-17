@@ -34,8 +34,12 @@ public class Event {
     private String title;
 
     @Column(nullable = false)
-    @Type(type="text")
+    @Type(type = "text")
     private String description;
+
+    @Column(nullable = false)
+    @Type(type = "text")
+    private String additionalInfo;
 
     @Column(nullable = false, length = 50)
     private String speakerFirstName;

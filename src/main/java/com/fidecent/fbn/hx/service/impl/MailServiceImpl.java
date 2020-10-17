@@ -51,7 +51,7 @@ public class MailServiceImpl implements MailService {
     public void sendEmail(String from, String recipient, String subject, String content, String replyTo) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         mimeMessage.setSubject(subject);
-        mimeMessage.setContent(content, "text/html");
+        mimeMessage.setContent(content, "text/html; charset=UTF-8");
         mimeMessage.setFrom(new InternetAddress(fromMailAddr, from));
         if (replyTo != null) {
             mimeMessage.setReplyTo(new Address[]{new InternetAddress(replyTo)});

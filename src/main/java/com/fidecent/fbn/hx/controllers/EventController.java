@@ -4,6 +4,7 @@ import com.fidecent.fbn.hx.dto.events.CreateEventRequest;
 import com.fidecent.fbn.hx.dto.events.EventDetails;
 import com.fidecent.fbn.hx.dto.events.EventDto;
 import com.fidecent.fbn.hx.dto.events.EventStatistic;
+import com.fidecent.fbn.hx.dto.events.ReblastRequest;
 import com.fidecent.fbn.hx.dto.events.SendRsvpInvites;
 import com.fidecent.fbn.hx.repo.EventStatisticsRepo;
 import com.fidecent.fbn.hx.service.EventService;
@@ -53,6 +54,12 @@ public class EventController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void sendRsvpInvites(@PathVariable Long eventId, @RequestBody @Valid SendRsvpInvites request) {
         eventService.sendRsvpInvites(eventId, request);
+    }
+
+    @PostMapping("{eventId}/reblast")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reblast(@PathVariable Long eventId, @RequestBody @Valid ReblastRequest request) {
+        eventService.reblast(eventId, request);
     }
 
     @GetMapping("statistics")

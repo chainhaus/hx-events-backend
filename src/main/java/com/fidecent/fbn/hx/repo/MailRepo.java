@@ -11,4 +11,6 @@ import java.util.Set;
 
 public interface MailRepo extends JpaRepository<Mail, Long> {
     List<Mail> findAllByStatusInOrderByCreatedDate(Collection<Mail.Status> status, Pageable pageable);
+
+    Mail findMailByAttendeeIdAndAndType(Long id, Mail.Type type);
 }

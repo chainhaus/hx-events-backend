@@ -37,6 +37,10 @@ public class EventAttendee {
     @Column(nullable = false)
     private String groupName;
 
+    @ColumnDefault("1")
+    @Column(insertable = false)
+    private Integer countOfRsvpSent;
+
     @Formula(value = "(SELECT (case when count(*) > 0 then 1 else 0 end) FROM MAIL m WHERE m.TYPE = 'RSVP' AND m.STATUS = 'SENT' AND m.ATTENDEE_ID = id)")
     private Boolean rsvpMailSent;
 
@@ -90,5 +94,17 @@ public class EventAttendee {
         this.groupName = groupName;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public void resetFlags() {
+        this.rsvpMailOpened = false;
+        this.rsvpAccepted = false;
+        this.rsvpDeclined = false;
+        this.rsvpApproved = false;
+        this.rsvpRejected = false;
+        this.calenderSent = false;
+        this.calenderAccepted = false;
+        this.calenderDeclined = false;
+        this.countOfRsvpSent++;
     }
 }

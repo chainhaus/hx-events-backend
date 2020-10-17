@@ -14,6 +14,8 @@ public interface RsvpDto {
 
     String getLastName();
 
+    Integer getCountOfRsvpSent();
+
     Boolean getRsvpAccepted();
 
     Boolean getRsvpMailSent();

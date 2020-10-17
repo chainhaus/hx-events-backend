@@ -18,6 +18,9 @@ public class CreateEventRequest {
     private String description;
 
     @NotBlank
+    private String additionalInfo;
+
+    @NotBlank
     @Length(max = 255)
     private String speakerFirstName;
 

@@ -23,4 +23,6 @@ public interface EventAttendeeRepo extends JpaRepository<EventAttendee, Long> {
     Set<String> findAllInvitedAttendeesForCalenderEvent(@Param("externalId") String externalId);
 
     List<EventAttendee> findAllByEventIdAndCalenderSentTrue(Long id);
+
+    List<EventAttendee> findAllByEventIdAndRsvpAcceptedFalseAndRsvpDeclinedFalse(Long eventId);
 }

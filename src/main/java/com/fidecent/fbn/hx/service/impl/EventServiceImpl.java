@@ -7,11 +7,13 @@ import com.fidecent.fbn.hx.domain.Mail;
 import com.fidecent.fbn.hx.dto.events.CreateEventRequest;
 import com.fidecent.fbn.hx.dto.events.EventDetails;
 import com.fidecent.fbn.hx.dto.events.EventDto;
+import com.fidecent.fbn.hx.dto.events.ReblastRequest;
 import com.fidecent.fbn.hx.dto.events.SendRsvpInvites;
 import com.fidecent.fbn.hx.dto.groups.DistributionGroupDto;
 import com.fidecent.fbn.hx.mappers.DataMapper;
 import com.fidecent.fbn.hx.repo.EventAttendeeRepo;
 import com.fidecent.fbn.hx.repo.EventRepo;
+import com.fidecent.fbn.hx.repo.MailRepo;
 import com.fidecent.fbn.hx.service.DistributionGroupService;
 import com.fidecent.fbn.hx.service.EventService;
 import com.fidecent.fbn.hx.service.MailService;
@@ -38,19 +40,21 @@ public class EventServiceImpl implements EventService {
     private final MailService mailService;
     private final SpringTemplateEngine templateEngine;
     private final EventAttendeeRepo eventAttendeeRepo;
+    private final MailRepo mailRepo;
     private final Environment environment;
 
     @Value("${hx-events.app.mail.test-addr}")
     private String testMailAddr;
 
 
-    public EventServiceImpl(EventRepo eventRepo, DataMapper dataMapper, DistributionGroupService groupService, MailService mailService, SpringTemplateEngine templateEngine, EventAttendeeRepo eventAttendeeRepo, Environment environment) {
+    public EventServiceImpl(EventRepo eventRepo, DataMapper dataMapper, DistributionGroupService groupService, MailService mailService, SpringTemplateEngine templateEngine, EventAttendeeRepo eventAttendeeRepo, MailRepo mailRepo, Environment environment) {
         this.eventRepo = eventRepo;
         this.dataMapper = dataMapper;
         this.groupService = groupService;
         this.mailService = mailService;
         this.templateEngine = templateEngine;
         this.eventAttendeeRepo = eventAttendeeRepo;
+        this.mailRepo = mailRepo;
         this.environment = environment;
     }
 
@@ -85,6 +89,7 @@ public class EventServiceImpl implements EventService {
         Context context = new Context();
         context.setVariable("event", event);
         if (isDevMode()) {
+            attendees.clear();
             attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG", "Rahil", "Husain"));
         }
         context.setVariable("decline", request.isDecline());
@@ -112,6 +117,34 @@ public class EventServiceImpl implements EventService {
             mailService.queueMail(mail);
         }
 
+    }
+
+    @Override
+    public void reblast(Long eventId, ReblastRequest request) {
+        Event event = eventRepo.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        event.setDescription(request.getDescription());
+        List<EventAttendee> attendees = eventAttendeeRepo.findAllByEventIdAndRsvpAcceptedFalseAndRsvpDeclinedFalse(eventId);
+        Context context = new Context();
+        context.setVariable("event", event);
+        context.setVariable("decline", true);
+        for (EventAttendee attendee : attendees) {
+            attendee.resetFlags();
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getToken())
+                    .build().toUri().toString();
+            context.setVariable("url", url);
+            String trackUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .pathSegment("api", "rsvp", attendee.getToken(), "copyright.png")
+                    .build().toUri().toString();
+            context.setVariable("trackUrl", trackUrl);
+            String content = templateEngine.process("rsvp-invitation", context);
+            Mail mail = mailRepo.findMailByAttendeeIdAndAndType(attendee.getId(), Mail.Type.RSVP);
+            mail.setBody(content);
+            mail.setStatus(Mail.Status.QUEUED);
+            mailService.queueMail(mail);
+        }
+        eventAttendeeRepo.saveAll(attendees);
     }
 
     private boolean isDevMode() {

@@ -18,6 +18,7 @@ import com.microsoft.graph.requests.extensions.IContactCollectionPage;
 import com.microsoft.graph.requests.extensions.IContactFolderCollectionPage;
 import com.microsoft.graph.requests.extensions.IDirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.extensions.IGroupCollectionPage;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
@@ -121,7 +122,7 @@ public interface GraphMapper {
 
     @SuppressWarnings("UnmappedTargetProperties")
     @Mapping(target = "subject", source = "title")
-    @Mapping(target = "body", source = "description")
+    @Mapping(target = "body", source = "additionalInfo")
     com.microsoft.graph.models.extensions.Event mapCalenderEvent(Event source);
 
     @SuppressWarnings("UnmappedTargetProperties")
