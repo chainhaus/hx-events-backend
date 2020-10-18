@@ -123,11 +123,11 @@ public class EventServiceImpl implements EventService {
     public void reblast(Long eventId, ReblastRequest request) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
-        event.setDescription(request.getDescription());
         List<EventAttendee> attendees = eventAttendeeRepo.findAllByEventIdAndRsvpAcceptedFalseAndRsvpDeclinedFalse(eventId);
         Context context = new Context();
         context.setVariable("event", event);
         context.setVariable("decline", true);
+        context.setVariable("reblast", request.getDescription());
         for (EventAttendee attendee : attendees) {
             attendee.resetFlags();
             String url = ServletUriComponentsBuilder.fromCurrentContextPath()
