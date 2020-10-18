@@ -85,7 +85,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         List<EventAttendee> attendees = groupService.getAttendeesForDistributionGroups(groups);
-        String subject = "Invitation for event - " + event.getTitle();
+        String subject = event.getTitle();
         Context context = new Context();
         context.setVariable("event", event);
         if (isDevMode()) {
