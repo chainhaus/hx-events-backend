@@ -126,7 +126,7 @@ public class EventServiceImpl implements EventService {
         List<EventAttendee> attendees = eventAttendeeRepo.findAllByEventIdAndRsvpAcceptedFalseAndRsvpDeclinedFalse(eventId);
         Context context = new Context();
         context.setVariable("event", event);
-        context.setVariable("decline", true);
+        context.setVariable("decline", request.getDecline());
         context.setVariable("reblast", request.getDescription());
         for (EventAttendee attendee : attendees) {
             attendee.resetFlags();
