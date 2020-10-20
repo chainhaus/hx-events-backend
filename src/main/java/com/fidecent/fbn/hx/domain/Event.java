@@ -41,12 +41,6 @@ public class Event {
     @Type(type = "text")
     private String additionalInfo;
 
-    @Column(nullable = false, length = 50)
-    private String speakerFirstName;
-
-    @Column(nullable = false, length = 50)
-    private String speakerLastName;
-
     @Column(nullable = false)
     private LocalDate date;
 
@@ -63,6 +57,10 @@ public class Event {
     @CreatedBy
     @Column(nullable = false)
     private String createdBy;
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Boolean zoomOverride;
 
     @Formula("(select count(*) from event_attendee a where a.event_id = id and a.rsvp_mail_opened = true)")
     private Integer openedInvitations;

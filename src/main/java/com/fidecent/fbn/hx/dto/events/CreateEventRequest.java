@@ -20,14 +20,6 @@ public class CreateEventRequest {
     @NotBlank
     private String additionalInfo;
 
-    @NotBlank
-    @Length(max = 255)
-    private String speakerFirstName;
-
-    @NotBlank
-    @Length(max = 255)
-    private String speakerLastName;
-
     @NotNull
     private LocalDate date;
 
@@ -36,4 +28,7 @@ public class CreateEventRequest {
 
     @NotNull
     private LocalTime endTime;
+
+    @NotNull
+    private Boolean zoomOverride;
 }

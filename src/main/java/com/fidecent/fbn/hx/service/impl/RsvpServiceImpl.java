@@ -206,6 +206,9 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Async
     @Transactional
     public void sendCalenderInvite(Event event, List<EventAttendee> attendee) {
+        if (event.getZoomOverride() != null && event.getZoomOverride()) {
+            return;//No calender invite shall be sent if zoomOverride is enabled
+        }
         String externalId = event.getExternalId();
         if (externalId == null) {
             Map<String, String> attendeeMap = new HashMap<>();
