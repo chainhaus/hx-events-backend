@@ -13,4 +13,6 @@ public class ReblastRequest {
     private String description;
     @NotNull
     private Boolean decline;
+    @NotNull
+    private String subject;
 }

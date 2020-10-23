@@ -10,6 +10,8 @@ import com.fidecent.fbn.hx.repo.EventStatisticsRepo;
 import com.fidecent.fbn.hx.service.EventService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +37,7 @@ public class EventController {
     }
 
     @GetMapping
-    public Page<EventDto> getAllEvents(Pageable pageable) {
+    public Page<EventDto> getAllEvents(@PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
         return eventService.findAll(pageable);
     }
 

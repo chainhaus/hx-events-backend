@@ -82,6 +82,7 @@ public class MailServiceImpl implements MailService {
                 if (mail.getType() == Mail.Type.APPROVED) {
                     rsvpService.sendCalenderInvite(mail.getAttendee().getEvent(), Collections.singletonList(mail.getAttendee()));
                 }
+                log.info("{} was sent {} mail for the event: {}-{}", mail.getAttendee().getEmail(), mail.getType(), mail.getAttendee().getEvent().getId(), mail.getAttendee().getEvent().getTitle());
             } catch (Exception e) {
                 log.catching(e);
                 mail.setStatus(Mail.Status.FAILED);

@@ -100,17 +100,23 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             if (newStatus != null) {
                 switch (newStatus) {
                     case ACCEPTED, TENTATIVELY_ACCEPTED -> {
-                        log.info("Updating status of attendee {} for the event {} to CALENDER_ACCEPTED", entity.getEmail(), event.getTitle());
+                        log.info("Updating status of attendee {} for the event {}-{} to CALENDER_ACCEPTED", entity.getEmail(), event.getId(), event.getTitle());
                         entity.setCalenderAccepted(true);
                     }
                     case DECLINED -> {
-                        log.info("Updating status of attendee {} for the event {} to CALENDER_DECLINED", entity.getEmail(), event.getTitle());
+                        log.info("Updating status of attendee {} for the event {}-{} to CALENDER_DECLINED", entity.getEmail(), event.getId(), event.getTitle());
                         entity.setCalenderDeclined(true);
+                    }
+                    case NONE, NOT_RESPONDED -> {
+                        //ignore
+                    }
+                    default -> {
+                        log.error("Unexpected calender invitation status {} of attendee {} for the event {}-{}", newStatus, entity.getEmail(), event.getId(), event.getTitle());
                     }
                 }
                 attendeeRepo.save(entity);
             } else {
-                log.error("Attendee {} is in DB but not received from calender api for event {} - {}", entity.getEmail(), event.getId(), event.getTitle());
+                log.error("Attendee {} is in DB but not received from calender api for event {}-{}", entity.getEmail(), event.getId(), event.getTitle());
             }
         });
     }
@@ -123,14 +129,15 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             var msg = attendee.getRsvpAccepted() ? "RSVP_ACCEPTED" : "RSVP_DECLINED";
             throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
         }
+        Event event = attendee.getEvent();
         if ("accept".equalsIgnoreCase(reply)) {
             attendee.setRsvpAccepted(true);
             String subject = "RSVP Alert";
             Context context = new Context();
-            context.setVariable("event", attendee.getEvent());
+            context.setVariable("event", event);
             context.setVariable("attendee", attendee);
             String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .pathSegment("rsvp", attendee.getEvent().getId().toString(), attendee.getId().toString(), "approve")
+                    .pathSegment("rsvp", event.getId().toString(), attendee.getId().toString(), "approve")
                     .build().toUri().toString();
             context.setVariable("url", url);
             String content = templateEngine.process("rsvp-alert", context);
@@ -151,6 +158,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         } else if ("decline".equalsIgnoreCase(reply)) {
             attendee.setRsvpDeclined(true);
         }
+        log.info("{} {}ed the RSVP for the event: {}-{}", attendee.getEmail(), reply, event.getId(), event.getTitle());
         attendee.setRsvpMailOpened(true);
     }
 
@@ -168,6 +176,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                 switch (request.getAction()) {
                     case FORCE_ACCEPT:
                         attendee.setRsvpAccepted(true);
+                        attendee.setRsvpDeclined(false);
                     case APPROVE:
                         if (attendee.getRsvpApproved()) {
                             throw new ResponseStatusException(HttpStatus.CONFLICT, "Invitation has already been approved");
@@ -196,8 +205,11 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                     case FORCE_DECLINE:
                         attendee.setRsvpDeclined(true);
                         attendee.setRsvpAccepted(false);
+                        attendee.setRsvpApproved(false);
+                        attendee.setRsvpRejected(false);
                         break;
                 }
+                log.info("RSVP {}d for the event: {}-{}", request.getAction(), event.getId(), event.getTitle());
             }
         });
     }
@@ -207,6 +219,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Transactional
     public void sendCalenderInvite(Event event, List<EventAttendee> attendee) {
         if (event.getZoomOverride() != null && event.getZoomOverride()) {
+            log.info("Zoom Override is enabled for the event: {}-{}. Skipping calender invitation for attendees: {}", event.getId(), event.getTitle(), attendee.stream().map(EventAttendee::getEmail).collect(Collectors.toList()));
             return;//No calender invite shall be sent if zoomOverride is enabled
         }
         String externalId = event.getExternalId();
@@ -223,14 +236,15 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             updateCalenderEvent(externalId, attendeeMap);
         }
         attendee.forEach(a -> a.setCalenderSent(true));
+        log.info("Calender invite sent to {} for the event: {}-{}", attendee.stream().map(EventAttendee::getEmail).collect(Collectors.toList()), event.getId(), event.getTitle());
         attendeeRepo.saveAll(attendee);
     }
 
     @Override
     @Transactional
     public void markOpened(String invitationToken) {
-        log.info("Mail opened : {}", invitationToken);
         EventAttendee attendee = findEventAttendee(invitationToken);
+        log.info("{} opened invitation mail for the event: {}-{}", attendee.getEmail(), attendee.getEvent().getId(), attendee.getEvent().getTitle());
         if (!attendee.getRsvpMailOpened()) {
             attendee.setRsvpMailOpened(true);
         }
