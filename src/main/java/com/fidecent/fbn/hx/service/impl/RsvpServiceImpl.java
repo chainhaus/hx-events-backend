@@ -1,5 +1,6 @@
 package com.fidecent.fbn.hx.service.impl;
 
+import com.fidecent.fbn.hx.configs.MDCFilter;
 import com.fidecent.fbn.hx.domain.Event;
 import com.fidecent.fbn.hx.domain.EventAttendee;
 import com.fidecent.fbn.hx.domain.Mail;
@@ -48,12 +49,13 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     private final TemplateEngine templateEngine;
     private final MailService mailService;
     private final NotificationRecipientRepo notificationRecipientRepo;
+    private final MDCFilter mdcFilter;
 
 
     @Value("${hx-events.azure.time-zone}")
     private String timeZone;
 
-    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper, TemplateEngine templateEngine, MailService mailService, NotificationRecipientRepo notificationRecipientRepo) {
+    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper, TemplateEngine templateEngine, MailService mailService, NotificationRecipientRepo notificationRecipientRepo, MDCFilter mdcFilter) {
         this.attendeeRepo = attendeeRepo;
         this.authenticationProvider = authenticationProvider;
         this.eventRepo = eventRepo;
@@ -61,6 +63,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         this.templateEngine = templateEngine;
         this.mailService = mailService;
         this.notificationRecipientRepo = notificationRecipientRepo;
+        this.mdcFilter = mdcFilter;
     }
 
     @Override
@@ -110,9 +113,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                     case NONE, NOT_RESPONDED -> {
                         //ignore
                     }
-                    default -> {
-                        log.error("Unexpected calender invitation status {} of attendee {} for the event {}-{}", newStatus, entity.getEmail(), event.getId(), event.getTitle());
-                    }
+                    default -> log.error("Unexpected calender invitation status {} of attendee {} for the event {}-{}", newStatus, entity.getEmail(), event.getId(), event.getTitle());
                 }
                 attendeeRepo.save(entity);
             } else {
@@ -125,6 +126,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Transactional
     public void replyInvitation(String invitationToken, String reply) {
         EventAttendee attendee = findEventAttendee(invitationToken);
+        mdcFilter.registerUsername(attendee.getEmail(), false);
         if (attendee.getRsvpAccepted() || attendee.getRsvpDeclined()) {
             var msg = attendee.getRsvpAccepted() ? "RSVP_ACCEPTED" : "RSVP_DECLINED";
             throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
@@ -244,6 +246,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Transactional
     public void markOpened(String invitationToken) {
         EventAttendee attendee = findEventAttendee(invitationToken);
+        mdcFilter.registerUsername(attendee.getEmail(), false);
         log.info("{} opened invitation mail for the event: {}-{}", attendee.getEmail(), attendee.getEvent().getId(), attendee.getEvent().getTitle());
         if (!attendee.getRsvpMailOpened()) {
             attendee.setRsvpMailOpened(true);

@@ -8,6 +8,7 @@ import com.fidecent.fbn.hx.dto.events.ReblastRequest;
 import com.fidecent.fbn.hx.dto.events.SendRsvpInvites;
 import com.fidecent.fbn.hx.repo.EventStatisticsRepo;
 import com.fidecent.fbn.hx.service.EventService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 
+@Log4j2
 @RestController
 @RequestMapping("api/events")
 public class EventController {

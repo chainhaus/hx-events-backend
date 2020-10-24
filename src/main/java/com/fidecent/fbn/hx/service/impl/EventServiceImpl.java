@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -50,6 +51,9 @@ public class EventServiceImpl implements EventService {
     @Value("${hx-events.app.mail.test-addr}")
     private String testMailAddr;
 
+    @Value("${hx-events.app.mail.new-event-notification}")
+    private String newEventNotificationRecipient;
+
 
     public EventServiceImpl(EventRepo eventRepo, DataMapper dataMapper, DistributionGroupService groupService, MailService mailService, SpringTemplateEngine templateEngine, EventAttendeeRepo eventAttendeeRepo, MailRepo mailRepo, Environment environment) {
         this.eventRepo = eventRepo;
@@ -71,11 +75,20 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDetails create(CreateEventRequest request) {
-        //TODO: Send mail to owner
         Event event = dataMapper.mapEventRequest(request);
         eventRepo.save(event);
         log.info("New Event created: {}", request);
+        sendEventCreationMail(event);
         return dataMapper.mapEventDetails(event);
+    }
+
+    @Async
+    @Override
+    public void sendEventCreationMail(Event event) {
+        Context context = new Context();
+        context.setVariable("event", event);
+        String content = templateEngine.process("event", context);
+        mailService.sendEmail("HX Events", newEventNotificationRecipient, "New Event Created", content, null);
     }
 
     @Override
@@ -131,6 +144,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         event.setDescription(request.getDescription());
+        event.setEmailSubject(request.getSubject());
         List<EventAttendee> attendees = eventAttendeeRepo.findAllByEventIdAndRsvpAcceptedFalseAndRsvpDeclinedFalse(eventId);
         Context context = new Context();
         context.setVariable("event", event);

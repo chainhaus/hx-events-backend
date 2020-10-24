@@ -32,7 +32,7 @@ public class Mail {
     private String subject;
 
     @Column(nullable = false)
-    @org.hibernate.annotations.Type(type="text")
+    @org.hibernate.annotations.Type(type = "text")
     private String body;
 
     @Column(nullable = false)
@@ -64,6 +64,6 @@ public class Mail {
     }
 
     public enum Type {
-        RSVP, APPROVED, RSVP_ALERT
+        RSVP, APPROVED, RSVP_ALERT, EVENT_NOTIFICATION
     }
 }

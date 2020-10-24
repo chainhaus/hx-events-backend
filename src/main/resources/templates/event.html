@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org">
+<p><b>Title:&nbsp;</b><span th:text="${event.title}">Event title</span></p>
+<p><b>Date:&nbsp;</b><span th:text="${event.date}">20-12-12</span></p>
+<p><b>Start Time:&nbsp;</b><span th:text="${event.startTime}">10.00AM</span></p>
+<p><b>End Time:&nbsp;</b><span th:text="${event.endTime}">10.00AM</span></p>
+<p><b>Zoom Override:&nbsp;</b><span th:text="${event.zoomOverride}">true</span></p>
+<p><b>Created By:&nbsp;</b><span th:text="${event.createdBy}">abc@gmail.com</span></p>
+
+<p><b>Description:&nbsp;</b></p>
+[(${event.description})]
+
+<p><b>Call Info:&nbsp;</b></p>
+[(${event.additionalInfo})]
+
+<div style="left:0;bottom:0;width:100%;font-size: 8pt;"><p style="text-align:center;"><span style="font-weight: bold">Disclaimer: </span>
+    FBN Securities Inc. archives and reviews both outgoing and incoming electronic correspondence. It may be required to
+    be produced to the SEC or to other regulators in a criminal investigation or in civil litigation. This is not an
+    offer or solicitation of an offer to buy or sell any security investment or other product. Any opinion or estimate
+    constitutes our best judgment as of this date and is subject to change without notice. E-mail transmission cannot be
+    guaranteed to be secure or error-free. The information in this e-mail, and any attachment therein, is confidential
+    and for use by the addressee only. If you are not the intended recipient, please return the e-mail to the sender and
+    delete it from your computer. If you would like to unsubscribe from this, or any FBN email, please notify us.</p>
+</div>
+</html>

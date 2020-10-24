@@ -41,7 +41,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic().disable()
                 .addFilterBefore(appRoleAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/rsvp/{invitationId}/reply/**").permitAll()
                 .antMatchers("/api/rsvp/{invitationId}/copyright.png").permitAll()
                 .antMatchers("/api/**").authenticated()

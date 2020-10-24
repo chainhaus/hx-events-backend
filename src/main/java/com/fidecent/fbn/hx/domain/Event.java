@@ -61,6 +61,8 @@ public class Event {
     @ColumnDefault("0")
     @Column(nullable = false)
     private Boolean zoomOverride;
+    
+    private String emailSubject;
 
     @Formula("(select count(*) from event_attendee a where a.event_id = id and a.rsvp_mail_opened = true)")
     private Integer openedInvitations;
