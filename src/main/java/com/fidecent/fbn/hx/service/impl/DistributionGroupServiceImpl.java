@@ -6,9 +6,6 @@ import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.extensions.IContactCollectionPage;
 import com.microsoft.graph.requests.extensions.IContactFolderCollectionPage;
 import com.microsoft.graph.requests.extensions.IContactFolderCollectionRequest;
-import com.microsoft.graph.requests.extensions.IDirectoryObjectCollectionWithReferencesPage;
-import com.microsoft.graph.requests.extensions.IGroupCollectionPage;
-import com.microsoft.graph.requests.extensions.IGroupCollectionRequest;
 import com.fidecent.fbn.hx.domain.EventAttendee;
 import com.fidecent.fbn.hx.dto.groups.DistributionGroupDto;
 import com.fidecent.fbn.hx.mappers.GraphMapper;
@@ -22,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,20 +38,14 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
     @Override
     public Page<DistributionGroupDto> getAllDistributionGroups(Pageable pageable) {
         //paging not supported for the groups resource
-        List<QueryOption> options = new ArrayList<>(2);
-        mapper.mapSortParam(pageable.getSort()).ifPresent(options::add);
+        List<QueryOption> options = mapper.mapPageable(pageable);
         IContactFolderCollectionRequest folderCollectionRequest = this.getGraphClient()
                 .me()
                 .contactFolders()
                 .buildRequest(options);
-//        IGroupCollectionRequest request = this.getGraphClient().groups()
-//                .buildRequest(options)
-//                .select("id,mail,displayName,description");
         try {
-//            IGroupCollectionPage page = request.get();
             IContactFolderCollectionPage collectionPage = folderCollectionRequest.get();
             return mapper.mapContactFolderResponse(collectionPage, pageable);
-//            return mapper.mapGroupResponse(page, pageable);
         } catch (GraphServiceException e) {
             log.catching(e);
             throw new ResponseStatusException(HttpStatus.valueOf(e.getResponseCode()), e.getMessage());
@@ -69,14 +59,14 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
                     .contactFolders(group.getId())
                     .contacts()
                     .buildRequest()
+                    .top(1000)
                     .get();
-//            IDirectoryObjectCollectionWithReferencesPage page = this.getGraphClient().groups(group.getId())
-//                    .members()
-//                    .buildRequest()
-//                    .select("mail,companyName,givenName,surname")
-//                    .get();
-//            return mapper.mapMemberMailsResponse(page, group.getDisplayName());
-            return mapper.mapMemberMailsResponse(collectionPage, group.getDisplayName());
+            List<EventAttendee> data = mapper.mapMemberMailsResponse(collectionPage, group.getDisplayName());
+            while (collectionPage.getNextPage() != null) {
+                IContactCollectionPage page = collectionPage.getNextPage().buildRequest().get();
+                data.addAll(mapper.mapMemberMailsResponse(page, group.getDisplayName()));
+            }
+            return data.stream();
         }).collect(Collectors.toList());
     }
 }

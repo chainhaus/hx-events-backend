@@ -91,12 +91,12 @@ public interface GraphMapper {
                 .map(obj -> new EventAttendee(getStringValue(obj.get("mail")), getStringValue(obj.get("companyName")), groupName, getStringValue(obj.get("givenName")), getStringValue(obj.get("surname"))));
     }
 
-    default Stream<EventAttendee> mapMemberMailsResponse(IContactCollectionPage source, String groupName) {
+    default List<EventAttendee> mapMemberMailsResponse(IContactCollectionPage source, String groupName) {
         List<Contact> page = source.getCurrentPage();
         Set<String> processed = new HashSet<>();
         return page.stream()
                 .map(obj -> new EventAttendee(obj.emailAddresses.get(0).address, obj.companyName, groupName, obj.givenName, obj.surname))
-                .filter(a -> processed.add(a.getEmail().toLowerCase()));
+                .filter(a -> processed.add(a.getEmail().toLowerCase())).collect(Collectors.toList());
     }
 
     default String getStringValue(JsonElement element) {

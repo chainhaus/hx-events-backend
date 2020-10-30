@@ -10,6 +10,7 @@ import com.fidecent.fbn.hx.dto.events.EventDto;
 import com.fidecent.fbn.hx.dto.events.ReblastRequest;
 import com.fidecent.fbn.hx.dto.events.SendRsvpInvites;
 import com.fidecent.fbn.hx.dto.groups.DistributionGroupDto;
+import com.fidecent.fbn.hx.dto.rsvp.RsvpDto;
 import com.fidecent.fbn.hx.mappers.DataMapper;
 import com.fidecent.fbn.hx.repo.EventAttendeeRepo;
 import com.fidecent.fbn.hx.repo.EventRepo;
@@ -34,6 +35,7 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -112,7 +114,16 @@ public class EventServiceImpl implements EventService {
             attendees.add(new EventAttendee(testMailAddr, "TEST", "TEST DG", "Rahil", "Husain"));
         }
         context.setVariable("decline", request.isDecline());
+        Set<String> existingAttendees = eventAttendeeRepo.findAllByEventId(eventId, Pageable.unpaged())
+                .stream()
+                .map(RsvpDto::getEmail)
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
         for (EventAttendee attendee : attendees) {
+            if (existingAttendees.contains(attendee.getEmail().toLowerCase())) {
+                //TODO: remove this later. Skip if already sent
+                continue;
+            }
             attendee.setToken(HashUtils.generateHash(attendee.getEmail(), event.getDate(), event.getStartTime(), event.getEndTime(), event.getTitle()));
             attendee.setEvent(event);
             eventAttendeeRepo.save(attendee);
