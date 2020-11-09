@@ -1,5 +1,6 @@
 package com.fidecent.fbn.hx.service.impl;
 
+import com.fidecent.fbn.hx.CommonUtils;
 import com.fidecent.fbn.hx.configs.MDCFilter;
 import com.fidecent.fbn.hx.domain.Event;
 import com.fidecent.fbn.hx.domain.EventAttendee;
@@ -103,12 +104,16 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             if (newStatus != null) {
                 switch (newStatus) {
                     case ACCEPTED, TENTATIVELY_ACCEPTED -> {
-                        log.info("Updating status of attendee {} for the event {}-{} to CALENDER_ACCEPTED", entity.getEmail(), event.getId(), event.getTitle());
-                        entity.setCalenderAccepted(true);
+                        if (!entity.getCalenderAccepted()) {
+                            log.info("Updating status of attendee {} for the event {}-{} to CALENDER_ACCEPTED", entity.getEmail(), event.getId(), event.getTitle());
+                            entity.setCalenderAccepted(true);
+                        }
                     }
                     case DECLINED -> {
-                        log.info("Updating status of attendee {} for the event {}-{} to CALENDER_DECLINED", entity.getEmail(), event.getId(), event.getTitle());
-                        entity.setCalenderDeclined(true);
+                        if (!entity.getCalenderDeclined()) {
+                            log.info("Updating status of attendee {} for the event {}-{} to CALENDER_DECLINED", entity.getEmail(), event.getId(), event.getTitle());
+                            entity.setCalenderDeclined(true);
+                        }
                     }
                     case NONE, NOT_RESPONDED -> {
                         //ignore
@@ -127,11 +132,12 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     public void replyInvitation(String invitationToken, String reply) {
         EventAttendee attendee = findEventAttendee(invitationToken);
         mdcFilter.registerUsername(attendee.getEmail(), false);
+        Event event = attendee.getEvent();
         if (attendee.getRsvpAccepted() || attendee.getRsvpDeclined()) {
+            log.info("{} already responded for the event: {}-{}", attendee.getEmail(), event.getId(), event.getTitle());
             var msg = attendee.getRsvpAccepted() ? "RSVP_ACCEPTED" : "RSVP_DECLINED";
             throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
         }
-        Event event = attendee.getEvent();
         if ("accept".equalsIgnoreCase(reply)) {
             attendee.setRsvpAccepted(true);
             String subject = "RSVP Alert";
@@ -211,7 +217,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                         attendee.setRsvpRejected(false);
                         break;
                 }
-                log.info("RSVP {}d for the event: {}-{}", request.getAction(), event.getId(), event.getTitle());
+                log.info("RSVP {}d for the attendee {} for the event: {}-{} by user {}", request.getAction(), attendee.getEmail(), event.getId(), event.getTitle(), CommonUtils.getLoggedInUser().orElse(null));
             }
         });
     }

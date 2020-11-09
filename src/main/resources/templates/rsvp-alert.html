@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.thymeleaf.org">
-"[(${attendee.firstName + ' ' + attendee.lastName})]" has accepted the invitation for the event "[(${event.title})]".
+"[(${attendee.firstName != null && attendee.lastName != null} ? ${attendee.firstName + ' ' + attendee.lastName} : ${attendee.email})]" has accepted the invitation for the event "[(${event.title})]".
 <p style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;">
     <a th:href="${url}" class="btn btn-primary"
        style="-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;text-decoration: none;color: #ffffff;padding: 10px 15px;display: inline-block;border-radius: 5px;background: #17bebb;font-size: 15pt;text-align: center; width: 75px;">Approve</a>
