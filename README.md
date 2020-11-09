@@ -2,13 +2,13 @@
 
 ![Java CI with Maven](https://github.com/chainhaus/hx-events-backend/workflows/Java%20CI%20with%20Maven/badge.svg)
 
-##1. Deployment
+## 1. Deployment
 The application can be installed to run as a systemd service.  
 See the documentation [here](https://docs.spring.io/spring-boot/docs/current/reference/html/deployment.html#deployment-systemd-service) how to install a spring boot app as systemd service.
 The service file (hx-events.service) is saved in the root folder of this repository.
 
 
-##2. Starting/Stopping the deployed application 
+## 2. Starting/Stopping the deployed application 
 If it is installed as systemd service then it can be started/stopped using systemd commands
 
 ```shell script
@@ -20,7 +20,7 @@ sudo systemctl status hx-events.service
 
 Refer to man systemctl for more details.
 
-##3. Viewing logs
+## 3. Viewing logs
 The application logs are saved in the home directory by default, and rotated daily.
 
 If the application is running as systemd service then the logs can also be viewed using journalctl commands
@@ -31,7 +31,7 @@ sudo journalctl -u hx-events.service
 
 Refer to man journalctl for more details.
 
-##4. Property Encryption
+## 4. Property Encryption
 Sensitive properties (like smtp credentials, application secrets) are saved in encrypted format (using [jasypt](https://github.com/ulisesbocchio/jasypt-spring-boot)) in this repository.
 
 #### Encryption
@@ -94,7 +94,7 @@ sensitive.password=DEC(decrypted)
 regular.property=example
 ```
 
-##5. Additional server configs.
+## 5. Additional server configs.
 ##### IP tables
 
 ```shell script
