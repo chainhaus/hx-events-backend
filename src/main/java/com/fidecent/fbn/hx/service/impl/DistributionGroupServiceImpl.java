@@ -55,15 +55,15 @@ public class DistributionGroupServiceImpl implements DistributionGroupService, G
     @Override
     public List<EventAttendee> getAttendeesForDistributionGroups(Set<DistributionGroupDto> groups) {
         return groups.stream().flatMap(group -> {
-            IContactCollectionPage collectionPage = this.getGraphClient().me()
+            IContactCollectionPage page = this.getGraphClient().me()
                     .contactFolders(group.getId())
                     .contacts()
                     .buildRequest()
                     .top(1000)
                     .get();
-            List<EventAttendee> data = mapper.mapMemberMailsResponse(collectionPage, group.getDisplayName());
-            while (collectionPage.getNextPage() != null) {
-                IContactCollectionPage page = collectionPage.getNextPage().buildRequest().get();
+            List<EventAttendee> data = mapper.mapMemberMailsResponse(page, group.getDisplayName());
+            while (page.getNextPage() != null) {
+                page = page.getNextPage().buildRequest().get();
                 data.addAll(mapper.mapMemberMailsResponse(page, group.getDisplayName()));
             }
             return data.stream();
