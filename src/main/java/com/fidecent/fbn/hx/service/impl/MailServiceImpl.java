@@ -78,7 +78,7 @@ public class MailServiceImpl implements MailService {
         log.debug("Running Mail queue scheduler");
         MailSetting settings = settingsService.getMailQueueSettings();
         Integer batchSize = settings.getBatchSize();
-        List<Mail> queuedMails = mailRepo.findAllByStatusInOrderByCreatedDate(Set.of(Mail.Status.QUEUED, Mail.Status.FAILED), PageRequest.of(0, batchSize));
+        List<Mail> queuedMails = mailRepo.findAllByStatusInOrderByCreatedDate(Set.of(Mail.Status.QUEUED), PageRequest.of(0, batchSize));
         log.debug("{} queued mails found", queuedMails.size());
         for (Mail mail : queuedMails) {
             try {
