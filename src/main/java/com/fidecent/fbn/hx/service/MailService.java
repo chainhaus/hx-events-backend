@@ -8,4 +8,6 @@ public interface MailService {
     void queueMail(Mail mail);
 
     void sendQueuedMails();
+
+    void sendAsync(Mail mail);
 }

@@ -84,7 +84,6 @@ public class EventServiceImpl implements EventService {
         return dataMapper.mapEventDetails(event);
     }
 
-    @Async
     @Override
     public void sendEventCreationMail(Event event) {
         Context context = new Context();

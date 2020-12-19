@@ -19,6 +19,7 @@ import com.microsoft.graph.authentication.IAuthenticationProvider;
 import com.microsoft.graph.models.generated.ResponseType;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,15 +69,25 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     }
 
     @Override
-    public Page<RsvpDto> findAll(Pageable pageable) {
-        Page<RsvpDto> page = attendeeRepo.findAllProjectedBy(pageable);
+    public Page<RsvpDto> findAll(String search, Pageable pageable) {
+        Page<RsvpDto> page;
+        if (StringUtils.isNotBlank(search)) {
+            page = attendeeRepo.findAllProjectedBy(StringUtils.wrap(search, '%'), pageable);
+        } else {
+            page = attendeeRepo.findAllProjectedBy(pageable);
+        }
         updateAttendeeStatus(page);
         return page;
     }
 
     @Override
-    public Page<RsvpDto> findByEventId(Long eventId, Pageable pageable) {
-        Page<RsvpDto> page = attendeeRepo.findAllByEventId(eventId, pageable);
+    public Page<RsvpDto> findByEventId(Long eventId, String search, Pageable pageable) {
+        Page<RsvpDto> page;
+        if (StringUtils.isNotBlank(search)) {
+            page = attendeeRepo.findAllByEventId(eventId, StringUtils.wrap(search, '%'), pageable);
+        } else {
+            page = attendeeRepo.findAllByEventId(eventId, pageable);
+        }
         updateAttendeeStatus(page);
         return page;
     }
@@ -161,7 +172,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
                 mail.setFromName("FBN Events");
                 mail.setToAddress(recipients);
                 mail.setType(Mail.Type.RSVP_ALERT);
-                mailService.queueMail(mail);
+                mailService.sendAsync(mail);
             }
         } else if ("decline".equalsIgnoreCase(reply)) {
             attendee.setRsvpDeclined(true);

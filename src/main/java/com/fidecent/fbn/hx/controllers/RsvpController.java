@@ -32,13 +32,13 @@ public class RsvpController {
     }
 
     @GetMapping
-    public Page<RsvpDto> findAll(Pageable pageable) {
-        return rsvpService.findAll(pageable);
+    public Page<RsvpDto> findAll(String search, Pageable pageable) {
+        return rsvpService.findAll(search, pageable);
     }
 
     @GetMapping("{eventId}")
-    public Page<RsvpDto> findByEventId(Pageable pageable, @PathVariable Long eventId) {
-        return rsvpService.findByEventId(eventId, pageable);
+    public Page<RsvpDto> findByEventId(String search, Pageable pageable, @PathVariable Long eventId) {
+        return rsvpService.findByEventId(eventId, search, pageable);
     }
 
     @PostMapping("{invitationToken}/reply/{reply:accept|decline}")
