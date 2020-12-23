@@ -24,6 +24,8 @@ public interface RsvpDto {
 
     Boolean getRsvpMailOpened();
 
+    Boolean getEventPageViewed();
+
     Boolean getRsvpDeclined();
 
     Boolean getRsvpApproved();

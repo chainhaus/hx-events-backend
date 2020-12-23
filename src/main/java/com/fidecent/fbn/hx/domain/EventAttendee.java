@@ -53,6 +53,10 @@ public class EventAttendee {
 
     @ColumnDefault("0")
     @Column(nullable = false, insertable = false)
+    private Boolean eventPageViewed;
+
+    @ColumnDefault("0")
+    @Column(nullable = false, insertable = false)
     private Boolean rsvpAccepted;
 
     @ColumnDefault("0")
@@ -98,6 +102,7 @@ public class EventAttendee {
 
     public void resetFlags() {
         this.rsvpMailOpened = false;
+        this.eventPageViewed = false;
         this.rsvpAccepted = false;
         this.rsvpDeclined = false;
         this.rsvpApproved = false;

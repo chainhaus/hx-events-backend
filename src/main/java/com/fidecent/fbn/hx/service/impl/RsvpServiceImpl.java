@@ -7,7 +7,9 @@ import com.fidecent.fbn.hx.domain.EventAttendee;
 import com.fidecent.fbn.hx.domain.Mail;
 import com.fidecent.fbn.hx.domain.NotificationRecipient;
 import com.fidecent.fbn.hx.dto.UpdateRsvpRequest;
+import com.fidecent.fbn.hx.dto.events.EventDetails;
 import com.fidecent.fbn.hx.dto.rsvp.RsvpDto;
+import com.fidecent.fbn.hx.mappers.DataMapper;
 import com.fidecent.fbn.hx.mappers.GraphMapper;
 import com.fidecent.fbn.hx.repo.EventAttendeeRepo;
 import com.fidecent.fbn.hx.repo.EventRepo;
@@ -48,6 +50,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     private final EventRepo eventRepo;
     private final EventAttendeeRepo attendeeRepo;
     private final GraphMapper mapper;
+    private final DataMapper dataMapper;
     private final TemplateEngine templateEngine;
     private final MailService mailService;
     private final NotificationRecipientRepo notificationRecipientRepo;
@@ -57,11 +60,12 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
     @Value("${hx-events.azure.time-zone}")
     private String timeZone;
 
-    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper, TemplateEngine templateEngine, MailService mailService, NotificationRecipientRepo notificationRecipientRepo, MDCFilter mdcFilter) {
+    public RsvpServiceImpl(EventAttendeeRepo attendeeRepo, IAuthenticationProvider authenticationProvider, EventRepo eventRepo, GraphMapper mapper, DataMapper dataMapper, TemplateEngine templateEngine, MailService mailService, NotificationRecipientRepo notificationRecipientRepo, MDCFilter mdcFilter) {
         this.attendeeRepo = attendeeRepo;
         this.authenticationProvider = authenticationProvider;
         this.eventRepo = eventRepo;
         this.mapper = mapper;
+        this.dataMapper = dataMapper;
         this.templateEngine = templateEngine;
         this.mailService = mailService;
         this.notificationRecipientRepo = notificationRecipientRepo;
@@ -268,6 +272,19 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
         if (!attendee.getRsvpMailOpened()) {
             attendee.setRsvpMailOpened(true);
         }
+    }
+
+    @Override
+    @Transactional
+    public EventDetails viewInvitation(String invitationToken) {
+        EventAttendee attendee = findEventAttendee(invitationToken);
+        mdcFilter.registerUsername(attendee.getEmail(), false);
+        if (!attendee.getEventPageViewed()) {
+            log.info("{} opened event page for the event: {}-{}", attendee.getEmail(), attendee.getEvent().getId(), attendee.getEvent().getTitle());
+            attendee.setEventPageViewed(true);
+            attendee.setRsvpMailOpened(true);
+        }
+        return dataMapper.mapEventDetails(attendee.getEvent());
     }
 
     public com.microsoft.graph.models.extensions.Event createCalenderEvent(Event event, Map<String, String> attendee) {

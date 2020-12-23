@@ -1,6 +1,7 @@
 package com.fidecent.fbn.hx.controllers;
 
 import com.fidecent.fbn.hx.dto.UpdateRsvpRequest;
+import com.fidecent.fbn.hx.dto.events.EventDetails;
 import com.fidecent.fbn.hx.dto.rsvp.RsvpDto;
 import com.fidecent.fbn.hx.service.RsvpService;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,11 @@ public class RsvpController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void replyRsvp(@PathVariable String invitationToken, @PathVariable String reply) {
         rsvpService.replyInvitation(invitationToken, reply);
+    }
+
+    @GetMapping("{invitationToken}/view")
+    public EventDetails viewRsvp(@PathVariable String invitationToken) {
+        return rsvpService.viewInvitation(invitationToken);
     }
 
     @GetMapping(path = "{invitationToken}/copyright.png", produces = MediaType.IMAGE_PNG_VALUE)
