@@ -119,6 +119,7 @@ public class EventServiceImpl implements EventService {
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
         for (EventAttendee attendee : attendees) {
+            attendee.setAllowDecline(request.isDecline());
             if (existingAttendees.contains(attendee.getEmail().toLowerCase())) {
                 //TODO: remove this later. Skip if already sent
                 continue;
@@ -161,6 +162,7 @@ public class EventServiceImpl implements EventService {
         context.setVariable("decline", request.getDecline());
         for (EventAttendee attendee : attendees) {
             attendee.resetFlags();
+            attendee.setAllowDecline(request.getDecline());
             String url = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .pathSegment("events", eventId.toString(), "reply-rsvp", attendee.getToken())
                     .build().toUri().toString();

@@ -7,7 +7,7 @@ import com.fidecent.fbn.hx.domain.EventAttendee;
 import com.fidecent.fbn.hx.domain.Mail;
 import com.fidecent.fbn.hx.domain.NotificationRecipient;
 import com.fidecent.fbn.hx.dto.UpdateRsvpRequest;
-import com.fidecent.fbn.hx.dto.events.EventDetails;
+import com.fidecent.fbn.hx.dto.rsvp.InvitationDetails;
 import com.fidecent.fbn.hx.dto.rsvp.RsvpDto;
 import com.fidecent.fbn.hx.mappers.DataMapper;
 import com.fidecent.fbn.hx.mappers.GraphMapper;
@@ -276,7 +276,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
 
     @Override
     @Transactional
-    public EventDetails viewInvitation(String invitationToken) {
+    public InvitationDetails viewInvitation(String invitationToken) {
         EventAttendee attendee = findEventAttendee(invitationToken);
         mdcFilter.registerUsername(attendee.getEmail(), false);
         if (!attendee.getEventPageViewed()) {
@@ -284,7 +284,7 @@ public class RsvpServiceImpl implements RsvpService, GraphService {
             attendee.setEventPageViewed(true);
             attendee.setRsvpMailOpened(true);
         }
-        return dataMapper.mapEventDetails(attendee.getEvent());
+        return new InvitationDetails(dataMapper.mapEventDetails(attendee.getEvent()), attendee.getAllowDecline());
     }
 
     public com.microsoft.graph.models.extensions.Event createCalenderEvent(Event event, Map<String, String> attendee) {

@@ -3,7 +3,7 @@ package com.fidecent.fbn.hx.service;
 import com.fidecent.fbn.hx.domain.Event;
 import com.fidecent.fbn.hx.domain.EventAttendee;
 import com.fidecent.fbn.hx.dto.UpdateRsvpRequest;
-import com.fidecent.fbn.hx.dto.events.EventDetails;
+import com.fidecent.fbn.hx.dto.rsvp.InvitationDetails;
 import com.fidecent.fbn.hx.dto.rsvp.RsvpDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,5 +27,5 @@ public interface RsvpService {
 
     void markOpened(String invitationToken);
 
-    EventDetails viewInvitation(String invitationToken);
+    InvitationDetails viewInvitation(String invitationToken);
 }

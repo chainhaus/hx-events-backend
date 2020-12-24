@@ -1,7 +1,7 @@
 package com.fidecent.fbn.hx.controllers;
 
 import com.fidecent.fbn.hx.dto.UpdateRsvpRequest;
-import com.fidecent.fbn.hx.dto.events.EventDetails;
+import com.fidecent.fbn.hx.dto.rsvp.InvitationDetails;
 import com.fidecent.fbn.hx.dto.rsvp.RsvpDto;
 import com.fidecent.fbn.hx.service.RsvpService;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +49,7 @@ public class RsvpController {
     }
 
     @GetMapping("{invitationToken}/view")
-    public EventDetails viewRsvp(@PathVariable String invitationToken) {
+    public InvitationDetails viewRsvp(@PathVariable String invitationToken) {
         return rsvpService.viewInvitation(invitationToken);
     }
 

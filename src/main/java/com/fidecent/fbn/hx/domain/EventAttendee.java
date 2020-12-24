@@ -37,6 +37,10 @@ public class EventAttendee {
     @Column(nullable = false)
     private String groupName;
 
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Boolean allowDecline;
+
     @ColumnDefault("1")
     @Column(insertable = false)
     private Integer countOfRsvpSent;
