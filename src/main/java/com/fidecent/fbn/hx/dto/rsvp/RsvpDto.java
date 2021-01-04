@@ -6,6 +6,8 @@ public interface RsvpDto {
 
     String getEmail();
 
+    String getToken();
+
     String getGroupName();
 
     String getCompanyName();
